@@ -1,0 +1,12 @@
+{
+  "databaseConfig": {
+    "driverName": "mysql",
+    "user": "root",
+    "password": "sysu",
+    "host": "localhost",
+    "port": "3306",
+    "database": "partner",
+    "charset": "utf8mb4",
+    "loc": "Asia%2FShanghai"
+  }
+}
