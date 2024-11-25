@@ -1,4 +1,4 @@
-module GolandProject
+module Partner_Web/Partner_Server
 
 go 1.22
 

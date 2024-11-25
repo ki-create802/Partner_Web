@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"GolandProject/common"
-	"GolandProject/model"
+	"Partner_Web/Partner_Server/common"
+	"Partner_Web/Partner_Server/model"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	//"golang.org/x/crypto/bcrypt"
@@ -15,6 +15,9 @@ type UserController struct {
 type InUserController interface {
 	Register(c *gin.Context) //实现注册功能
 	Login(c *gin.Context)    //实现登录功能
+	GuanZhu(c *gin.Context)  //用户关注
+	FansNum(c *gin.Context)  //返回粉丝数
+	EditInfo(c *gin.Context) //用户编辑信息
 }
 
 func NewUserController() InUserController {
@@ -31,14 +34,19 @@ func (a UserController) Register(c *gin.Context) {
 	var requestUser model.User
 	// 将请求中的JSON数据绑定到User结构体中，方便后续操作
 	c.Bind(&requestUser)
+	userid := requestUser.UID
 	userName := requestUser.UName
 	userEmail := requestUser.UEmail
 	password := requestUser.UKey
+	userremark := requestUser.URemark
+	userimage := requestUser.UImage
+
+	//加个注册验证邮箱
 
 	// 验证数据
 	var user model.User
 	a.DB.Table("user").Where("UEmail=?", userEmail).First(&user)
-	if user.UID != "" { // 该邮箱已存在，返回422，且返回提示信息
+	if user.UID != 0 { // 该邮箱已存在，返回422，且返回提示信息
 		common.Fail(c, 422, nil, "该邮箱已注册")
 		return
 	}
@@ -48,10 +56,13 @@ func (a UserController) Register(c *gin.Context) {
 
 	// 创建用户
 	newUser := model.User{
+		UID:    userid,
 		UName:  userName,
 		UEmail: userEmail,
 		//Password:    string(hashedPassword),
-		UKey: password,
+		UKey:    password,
+		URemark: userremark,
+		UImage:  userimage,
 	}
 	a.DB.Table("user").Create(&newUser)
 	//***********************************************************
@@ -77,7 +88,7 @@ func (a UserController) Login(c *gin.Context) {
 	// 数据验证
 	var user model.User
 	a.DB.Table("user").Where("UEmail=?", userEmail).First(&user)
-	if user.UID == "" {
+	if user.UID == 0 {
 		common.Fail(c, 422, nil, "用户不存在")
 		return
 	}
@@ -102,4 +113,77 @@ func (a UserController) Login(c *gin.Context) {
 
 	// 返回结果
 	common.Success(c, gin.H{"token": token}, "登录成功")
+}
+
+// 关注行为添加到配对表
+func (a UserController) GuanZhu(c *gin.Context) {
+	var requestUser model.Gz
+	c.Bind(&requestUser)
+	gzid := requestUser.Gzid
+	bgzid := requestUser.Bgzid
+
+	// 创建用户
+	newMatch := model.Gz{
+		Gzid:  gzid,
+		Bgzid: bgzid,
+	}
+	a.DB.Table("gzmatch").Create(&newMatch)
+
+	// 返回成功响应
+	common.Success(c, nil, "关注配对成功")
+}
+
+// 返回粉丝数量  前端传入的数据是用户id 是可以只返回一个Uid的
+func (a UserController) FansNum(c *gin.Context) {
+	var requestUser model.User
+	c.Bind(&requestUser)
+	userid := requestUser.UID
+
+	// 数据验证
+	var user model.User
+	a.DB.Table("user").Where("uid=?", userid).First(&user)
+	if user.UID == 0 {
+		common.Fail(c, 422, nil, "用户不存在")
+		return
+	}
+
+	// 查找 gzmatch 表中 bgzid 等于 userid 的条目数量
+	var count int64
+	a.DB.Table("gzmatch").Where("bgz_id=?", userid).Count(&count)
+
+	// 返回结果
+	common.Success(c, gin.H{"fansNum": count}, "获取粉丝数成功")
+}
+
+func (a UserController) EditInfo(c *gin.Context) {
+	var requestUser model.User
+	c.Bind(&requestUser)
+	userid := requestUser.UID //用户id是固定的不允许改动的 这里读取过来是调数据库信息
+	userName := requestUser.UName
+	userEmail := requestUser.UEmail
+	password := requestUser.UKey
+	userRemark := requestUser.URemark
+	userImage := requestUser.UImage
+
+	// 数据验证
+	var user model.User
+	a.DB.Table("user").Where("uid=?", userid).First(&user)
+	if user.UID == 0 {
+		common.Fail(c, 422, nil, "用户不存在")
+		return
+	}
+
+	// 更新用户信息
+	updateData := model.User{
+		UName:   userName,
+		UEmail:  userEmail,
+		UKey:    password,
+		URemark: userRemark,
+		UImage:  userImage,
+	}
+	a.DB.Table("user").Where("uid=?", userid).Updates(updateData)
+
+	// 返回成功响应
+	common.Success(c, nil, "用户信息更新成功")
+
 }

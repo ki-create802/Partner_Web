@@ -1,8 +1,8 @@
 package main
 
 import (
-	"GolandProject/common"
-	"GolandProject/routes"
+	"Partner_Web/Partner_Server/common"
+	"Partner_Web/Partner_Server/routes"
 	"github.com/gin-gonic/gin"
 
 	//"github.com/gin-gonic/gin"

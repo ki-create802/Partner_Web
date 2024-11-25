@@ -3,7 +3,7 @@ package common
 //借鉴的助教他们的 可能还有需要修改的地方 还没细看 标记一下
 
 import (
-	"GolandProject/model"
+	"Partner_Web/Partner_Server/model"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -13,7 +13,7 @@ import (
 var jwtKey = []byte("a_secret_key")
 
 type Claims struct {
-	UserId   string
+	UserId   uint
 	UserType string
 	jwt.StandardClaims
 }
