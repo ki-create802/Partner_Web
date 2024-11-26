@@ -32,11 +32,11 @@
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     
         <p class="signup-link">
-            还没有账号？ <router-link to="/register">点击此处注册</router-link>
+            还没有账号？ <router-link to="/RegistPage">点击此处注册</router-link>
         </p>
 
         <p>
-            <router-link to="/forgot-password">忘记密码?</router-link>
+            <router-link to="/ForgotPWPage">忘记密码?</router-link>
         </p>
     </div>
 </template>

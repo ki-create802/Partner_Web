@@ -7,6 +7,7 @@ import HomePage from '../page/HomePage.vue';
 import FindPage from '../page/FindPage.vue';
 import ChatPage from '../page/ChatPage.vue';
 import PersonalPage from '../page/PersonalPage.vue';
+import ForgotPWPage from '@/page/ForgotPWPage.vue';
 
 
 const routes = [
@@ -20,6 +21,11 @@ const routes = [
     path: '/RegistPage',
     name: 'RegistPage',
     component: RegistPage
+  },
+  { 
+    path: "/ForgotPWPage", 
+    name: "ForgotPWPage", 
+    component: ForgotPWPage
   },
   {
     path: '/HomePage',
