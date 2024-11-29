@@ -3,6 +3,7 @@ package controller
 import (
 	"Partner_Web/Partner_Server/common"
 	"Partner_Web/Partner_Server/model"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	//"golang.org/x/crypto/bcrypt"
@@ -15,9 +16,11 @@ type UserController struct {
 type InUserController interface {
 	Register(c *gin.Context) //实现注册功能
 	Login(c *gin.Context)    //实现登录功能
+	Logout(c *gin.Context)   //用户登出
 	GuanZhu(c *gin.Context)  //用户关注
 	FansNum(c *gin.Context)  //返回粉丝数
 	EditInfo(c *gin.Context) //用户编辑信息
+	Info(c *gin.Context)     //返回用户信息
 }
 
 func NewUserController() InUserController {
@@ -93,6 +96,12 @@ func (a UserController) Login(c *gin.Context) {
 		return
 	}
 
+	var userID uint
+	userID = user.UID
+	session := sessions.Default(c) //获取会话
+	session.Set("userID", userID)  //将用户ID存储在会话中
+	session.Save()
+
 	if user.UKey != password {
 		common.Fail(c, 422, nil, "密码错误")
 		return
@@ -133,11 +142,21 @@ func (a UserController) GuanZhu(c *gin.Context) {
 	common.Success(c, nil, "关注配对成功")
 }
 
-// 返回粉丝数量  前端传入的数据是用户id 是可以只返回一个Uid的
-func (a UserController) FansNum(c *gin.Context) {
-	var requestUser model.User
-	c.Bind(&requestUser)
-	userid := requestUser.UID
+func (a UserController) Logout(c *gin.Context) { //用户登出
+	session := sessions.Default(c)
+	session.Clear() // 清除所有会话数据
+	session.Save()  // 保存更改
+	common.Success(c, nil, "用户已登出")
+}
+
+// 返回粉丝数量  前端传入的数据是用户id 是可以只返回一个Uid的 用全局变量
+func (a UserController) FansNum(c *gin.Context) { //
+	//var requestUser model.User
+	//c.Bind(&requestUser)
+	//userid := requestUser.UID
+
+	session := sessions.Default(c)  //获取会话
+	userid := session.Get("userID") //获取ID
 
 	// 数据验证
 	var user model.User
@@ -186,4 +205,28 @@ func (a UserController) EditInfo(c *gin.Context) {
 	// 返回成功响应
 	common.Success(c, nil, "用户信息更新成功")
 
+}
+
+func (a UserController) Info(c *gin.Context) { //返回用户信息
+	session := sessions.Default(c)  //获取会话
+	userID := session.Get("userID") //获取ID
+	if userID == nil {
+		common.Fail(c, 422, nil, "用户未登录")
+		return
+	}
+
+	var user model.User
+	a.DB.Table("user").Where("uid=?", userID).First(&user)
+	// 更新用户信息
+	infoOfUser := model.User{
+		UID:     user.UID,
+		UName:   user.UName,
+		UEmail:  user.UEmail,
+		UKey:    user.UKey,
+		URemark: user.URemark,
+		UImage:  user.UImage,
+	}
+
+	// 返回成功响应
+	common.Success(c, gin.H{"user": infoOfUser}, "用户信息传递成功")
 }
