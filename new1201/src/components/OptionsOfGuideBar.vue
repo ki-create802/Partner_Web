@@ -3,6 +3,7 @@
     <div class="user-options">
       <div class="option" @click="handleLogout">退出登录</div>
       <div class="option" @click="handleChangePassword">修改密码</div>
+      <div class="option" @click="toPersonalPage">个人主页</div>
     </div>
   </template>
   
@@ -14,12 +15,16 @@ import router from '@/router';
     methods: {
       handleLogout() {
         // 处理退出登录逻辑
+        localStorage.clear();
         router.push("/");
         console.log('退出登录');
       },
       handleChangePassword() {
         // 处理修改密码逻辑
         console.log('修改密码');
+      },
+      toPersonalPage(){
+        router.push("PersonalPage");
       }
     }
   }

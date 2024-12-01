@@ -3,7 +3,7 @@
     <div class="mybody">
       <div class="left">
         <CarouselImage :images="images" />
-        <SearchBox class="searchbox" />
+        <SearchBox class="searchbox" @search="handleSearch"/>
         <div class="sections">
           <button>拼车</button>
           <button>运动</button>
@@ -34,7 +34,8 @@
   import CarouselImage from '@/components/CarouselImage.vue';
   import SearchBox from '@/components/SearchBox.vue';
   import FindListItem from '@/components/FindListItem.vue';
-  
+  import axios from 'axios';
+
   export default {
     name: 'HomePage',
     components: {
@@ -55,6 +56,27 @@
           require('@/assets/轮播6.jpg')
         ]
       };
+    },
+    methods:{
+      async handleSearch(query) {
+        try {
+          // 向后端发送搜索请求
+          const response = await axios.get(`http://localhost:3000/api/search?q=${query}`);
+          const searchResults = response.data;
+          alert("收到信息"+JSON.stringify(searchResults));
+          // 导航到 FindPage 并传递搜索内容和结果
+          this.$router.push({
+            name: 'FindPage',
+            query: { 
+              q: query,
+              results: JSON.stringify(searchResults) // 将搜索结果编码为 JSON 字符串
+            }
+        });
+        } catch (error) {
+          alert("搜索信息失败");
+          console.error('搜索请求失败:', error);
+        }
+      }
     }
   }
   </script>

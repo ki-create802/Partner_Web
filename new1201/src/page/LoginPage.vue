@@ -51,24 +51,44 @@
                 errorMessage: "",
             };
         },
+        setup(){
+        },
         methods: {
-            handleLogin() {
-                // Simple validation
+            async handleLogin() {
                 if (!this.email || !this.password) {
                     this.errorMessage = "账号或密码不能为空！";
                     return;
                 }
 
-                // Simulated login logic
-                if (this.email === "user@example.com" && this.password === "password") {
-                    alert("Login successful!");
-                    this.errorMessage = "";
-                    this.$router.push("/HomePage"); // 登录成功后跳转到主页
-                } else {
-                    this.errorMessage = "Invalid email or password.";
+                try {
+                    const response = await fetch('http://localhost:3000/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            Email: this.email,
+                            Password: this.password
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert(data.UID, "登录成功！");
+                        // 将用户信息存储在本地
+                        localStorage.setItem('user', JSON.stringify(data));
+                        localStorage.setItem('userImage', data.UImage); // 存储用户头像URL
+                        this.$router.push("/HomePage"); // 登录成功后跳转到主页
+                    } else {
+                        this.errorMessage = data.message;
+                    }
+                } catch (error) {
+                    this.errorMessage = "网络错误，请稍后再试。";
                 }
-            },
-        },
+            }
+    
+        }    
     };
 </script>
 

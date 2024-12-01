@@ -5,14 +5,8 @@
 </template>
 
 <script>
-import { provide,ref } from 'vue';
 export default {
   setup(){
-    const userID=ref("");
-    provide('userID',userID);
-    return{
-      userID
-    };
   }
 }
 </script>

@@ -1,37 +1,42 @@
-<!-- src/components/SearchBox.vue -->
 <template>
-    <div class="search-box">
-      <input
-        type="text"
-        v-model="searchQuery"
-        @input="handleInput"
-        placeholder="请输入搜索内容"
-      />
-      <button @click="handleSearch">搜索</button>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    name: 'SearchBox',
-    data() {
-      return {
-        searchQuery: ''
-      };
-    },
-    methods: {
-      handleInput() {
-        // 当输入框内容变化时触发
-        this.$emit('input', this.searchQuery);
-      },
-      handleSearch() {
-        // 当点击搜索按钮时触发
-        this.$emit('search', this.searchQuery);
-      }
+  <div class="search-box">
+    <input
+      type="text"
+      v-model="searchQuery"
+      @input="handleInput"
+      placeholder="请输入搜索内容"
+    />
+    <button @click="handleSearch">搜索</button>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'SearchBox',
+  props: {
+    initialQuery: {
+      type: String,
+      default: ''
     }
-  };
-  </script>
-  
+  },
+  data() {
+    return {
+      searchQuery: this.initialQuery
+    };
+  },
+  methods: {
+    handleInput() {
+      // 当输入框内容变化时触发
+      this.$emit('input', this.searchQuery);
+    },
+    handleSearch() {
+      // 当点击搜索按钮时触发
+      this.$emit('search', this.searchQuery);
+    }
+  }
+};
+</script>
+
   <style scoped>
   .search-box {
     width: 80%;
