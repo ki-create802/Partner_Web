@@ -6,7 +6,7 @@
       @input="handleInput"
       placeholder="请输入搜索内容"
     />
-    <button @click="handleSearch">搜索</button>
+    <button @click="handleSearch">搜索全部</button>
   </div>
 </template>
 
@@ -17,11 +17,16 @@ export default {
     initialQuery: {
       type: String,
       default: ''
+    },
+    initialScope: {
+      type: String,
+      default: '全部'
     }
   },
   data() {
     return {
-      searchQuery: this.initialQuery
+      searchQuery: this.initialQuery,
+      searchScope: this.initialScope
     };
   },
   methods: {
@@ -31,7 +36,7 @@ export default {
     },
     handleSearch() {
       // 当点击搜索按钮时触发
-      this.$emit('search', this.searchQuery);
+      this.$emit('search', { query: this.searchQuery, scope: this.searchScope });
     }
   }
 };

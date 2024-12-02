@@ -20,6 +20,7 @@
 
 <script>
 import ScheduleList from './ScheduleList.vue';
+import axios from 'axios';
 
 export default {
   name: 'ACalendar',
@@ -32,12 +33,12 @@ export default {
       selectedDate: null,
       daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       scheduleItems: [
-        { date: '10.01', content: '和约翰打球' },
-        { date: '10.05', content: '一起去广州拼车' },
-        { date: '10.10', content: '淇澳岛约拍' },
-        { date: '10.01', content: '和约翰打球' },
-        { date: '10.05', content: '一起去广州拼车' },
-        { date: '10.10', content: '淇澳岛约拍' }
+        { date: '10.01', content: '默认行程' },
+        { date: '10.05', content: '默认行程' },
+        { date: '10.10', content: '默认行程' },
+        { date: '10.01', content: '默认行程' },
+        { date: '10.05', content: '默认行程' },
+        { date: '10.10', content: '默认行程' }
 
       ]
     };
@@ -70,7 +71,33 @@ export default {
       return dates;
     }
   },
+  created() {
+    this.fetchScheduleItems();
+  },
   methods: {
+    //获取个人日程信息  
+    async fetchScheduleItems() {
+      // 从本地存储中获取用户信息
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+          console.error('User information not found in local storage.');
+          return;
+        }
+        const uid = user.UID;
+      //向后端发送请求个人日程请求
+      
+        const response = await axios.get('http://localhost:3000/api/schedule', 
+        {
+          params:{
+            Uid: uid,
+          },
+        });
+        this.scheduleItems = response.data;
+      } catch (error) {
+        console.error('There was an error fetching the schedule items!', error);
+      }
+    },
     prevMonth() {
       this.currentDate = new Date(this.currentYear, this.currentMonth - 1, 1);
     },
