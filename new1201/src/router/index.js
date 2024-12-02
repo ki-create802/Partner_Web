@@ -8,6 +8,7 @@ import FindPage from '../page/FindPage.vue';
 import ChatPage from '../page/ChatPage.vue';
 import PersonalPage from '../page/PersonalPage.vue';
 import AboutUsPage from '@/page/AboutUsPage.vue';
+import NewRoomPage from '@/page/NewRoomPage.vue';
 import ForgotPWPage from '@/page/ForgotPWPage.vue';
 
 const routes = [
@@ -44,6 +45,12 @@ const routes = [
     path: '/PersonalPage',
     name: 'PersonalPage',
     component: PersonalPage,
+    meta: { requiresAuth: true } // 需要认证
+  },
+  {
+    path: '/NewRoomPage',
+    name: 'NewRoomPage',
+    component: NewRoomPage,
     meta: { requiresAuth: true } // 需要认证
   },
   {
