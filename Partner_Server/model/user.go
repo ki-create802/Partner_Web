@@ -13,3 +13,8 @@ type Gz struct {
 	Gzid  uint `gorm:"column:gz_id;;not null;primaryKey"`
 	Bgzid uint `gorm:"column:bgz_id;;not null;primaryKey"`
 }
+
+type EmailMessage struct {
+	Email string `json:"email"`
+	Code  string `json:"code"`
+}
