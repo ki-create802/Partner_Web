@@ -101,6 +101,7 @@ const usersInfo = [
   
   // 用户列表接口
   app.get('/api/users', (req, res) => {
+    console.log("请求用户列表");
     res.status(200).json(usersInfo);
   });
 

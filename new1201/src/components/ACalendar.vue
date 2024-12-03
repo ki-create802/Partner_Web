@@ -1,6 +1,7 @@
 <!-- src/components/ACalendar.vue -->
 <template>
   <div class="calendar">
+    <h1>我的行程</h1>
     <div class="header">
       <button @click="prevMonth">&lt;</button>
       <span>{{ currentMonthName }} {{ currentYear }}</span>
@@ -130,9 +131,10 @@ export default {
 
 <style scoped>
 .calendar {
+  background-color: rgb(221, 250, 255);
   width: 300px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 5px solid #a0f1ff;
+  border-radius: 20px;
   padding: 10px;
 }
 
@@ -142,11 +144,16 @@ export default {
   align-items: center;
   margin-bottom: 10px;
 }
-
+.header button{
+  background-color: #ffffff;
+  border:none;
+}
 .days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   margin-bottom: 10px;
+  font-size: 24px;
+  color: rgb(0, 117, 184);
 }
 
 .day-name {
@@ -156,7 +163,7 @@ export default {
 .dates {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
+  gap: 10px;
 }
 
 .date {
@@ -169,6 +176,7 @@ export default {
   border: none;
   background-color: transparent;
   cursor: pointer;
+  font-size: 20px;
 }
 
 .date.selected button {
@@ -180,6 +188,6 @@ export default {
 .date.today button {
   background-color: #ffc107;
   color: white;
-  border-radius: 4px;
+  border-radius: 40%;
 }
 </style>

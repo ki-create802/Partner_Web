@@ -85,11 +85,16 @@ export default {
     async handleUserSearch() {
       try {
         // 向后端发送用户搜索请求
-        const response = await axios.get(`http://localhost:3000/api/users`); // 假设后端有 /api/users 接口
+        const response = await axios.get(`http://localhost:3000/api/users`, {
+          params: {
+            searchWord: this.searchQuery
+          }
+        });
         this.userResults = response.data;
         this.searchUser = true; // 设置用户搜索状态
         console.log(this.userResults); // 使用 console.log 替换 alert
       } catch (error) {
+        alert("请求用户信息失败");
         console.error('用户搜索请求失败:', error);
       }
     }

@@ -20,7 +20,6 @@
       </div>
     </div>
     <div class="right">
-      <h1>我的行程</h1>
       <ACalendar class="calendar" />
     </div>
   </div>
@@ -102,7 +101,6 @@ export default {
 
 .left {
   flex: 0 0 60%; /* 占据 60% 的宽度 */
-  background-color: transparent;
   display: flex;
   flex-direction: column;
   align-items: center; /* 水平居中 */
@@ -110,11 +108,13 @@ export default {
 }
 
 .right {
+  background-color: #f8feffbd;
   flex: 0 0 30%; /* 占据 40% 的宽度 */
   display: flex;
   flex-direction: column;
   align-items: center; /* 水平居中 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 30px;
 }
 
 .calendar {
