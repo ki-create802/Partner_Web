@@ -26,12 +26,12 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		userRoutes.POST("verify-reset-code", userController.VerifyResetCode) //验证验证码
 	}
 
-	//chatController := controller.NewChatController()
-	//chatRoutes := r.Group("/chat")
-	//{
-	//	chatRoutes.GET("searchChatList", chatController.SearchChatList) //返回聊天室匹配结果
-	//	chatRoutes.GET("searchUser", chatController.SearchUser)         //返回用户匹配结果
-	//}
+	chatController := controller.NewChatController()
+	chatRoutes := r.Group("/chat")
+	{
+		chatRoutes.POST("searchChatList", chatController.SearchChatList) //返回聊天室匹配结果
+		chatRoutes.POST("searchUser", chatController.SearchUser)         //返回用户匹配结果
+	}
 
 	return r
 }

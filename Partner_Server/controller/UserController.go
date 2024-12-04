@@ -38,7 +38,7 @@ func NewUserController() InUserController {
 }
 
 // 注册
-func (a UserController) Register(c *gin.Context) {
+func (a UserController) Register(c *gin.Context) { //未完成
 
 	// 获取context中的参数
 	var requestUser model.User
@@ -76,10 +76,10 @@ func (a UserController) Register(c *gin.Context) {
 	}
 	a.DB.Table("user").Create(&newUser)
 	//***********************************************************
-	//还缺少的功能 分配用户id
+	//还缺少的功能 分配用户id 自增长
 	//密码加密功能
 	//对于用户名要不要不让重复
-	//默认头像图标
+	//默认头像图标11111111111111111111111111111111111111111111
 	//************************************************************
 
 	// 返回成功响应
@@ -95,6 +95,7 @@ func (a UserController) Login(c *gin.Context) {
 	userEmail := requestUser.UEmail
 	password := requestUser.UKey
 
+	//fmt.Println("email:", userEmail, "  password:", password)
 	// 数据验证
 	var user model.User
 	a.DB.Table("user").Where("UEmail=?", userEmail).First(&user)
