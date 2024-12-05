@@ -7,7 +7,7 @@
                 <a class="roomIntro">{{ item.roomIntro }}</a>
             </left>
             <right>
-                <img v-for="(image, index) in item.images" :key="index" :src="image" />
+                <img v-for="(image, index) in item.images" :key="index" :src="'http://localhost:3000/'+image" />
             </right>
         </div>
     </div>
