@@ -1,87 +1,82 @@
 <template>
     <div class="top-rectangle"></div>
-    <el-menu class="topbar" router :default-active="this.$route.fullPath" mode="horizontal" :ellipsis="false">
+    <div class="topbar">
         <div class="logo">
             <img src="../assets/logo.jpg" alt="Logo" class="logo">
         </div>
         <div class="navbar">
             <ul class="nav-items">
-                <li v-for="(item, index) in noSubMenuItems" :key="index" class="nosub-item">
-                    <div v-if="item.type === 'text'">
-                        <a href="#" >{{ item.label }}</a>
+                <button @click="toHomePage">首页</button>
+                <button @click="toFindPage">求搭列表</button>
+                <button @click="toChatPage">我的聊天</button>
+                <button @click="toAboutUsPage">关于我们</button>
+                <div class="newARoom">
+                    <img @click="toNewRoomPage" src='@/assets/create_groups.png' style="height: 40px;">
+                </div>
+                <div>
+                    <img style="width: 40px;" src='@/assets/personal_setting.png'/>
+                    <button @click="toggleDropdown" class="dropdown-toggle">
+                        <i :class="{'rotate': isDropdownVisible}">&#9660;</i> <!-- 向下箭头 -->
+                    </button>
+                    <div v-show="isDropdownVisible" class="dropdown">
+                        <ul>
+                            <button @click="toPersonalPage">个人主页</button>
+                            <button @click="ChangePass">修改密码</button>
+                            <button @click="PersonExport">退出登录</button>
+                        </ul>
                     </div>
-                    <div v-if="item.type === 'image'">
-                        <img style="width: 25px; height: auto;" :src="require(`../assets/${item.icon}`)" alt="icon" />
-                    </div>
-                </li>
-                <li v-for="(item, index) in hasSubMenuItems" :key="index" :index="item.index" class="hassub-item">
-                    <div>
-                        <img style="width: 25px; height: auto;" :src="require(`../assets/${item.icon}`)"/>
-                        <button @click="toggleDropdown(index)" class="dropdown-toggle">
-                            <i :class="{'rotate': item.isDropdownVisible}">&#9660;</i> <!-- 向下箭头 -->
-                        </button>
-                        <div v-show="item.isDropdownVisible" class="dropdown">
-                            <ul>
-                                <li v-for="(subItem, subIndex) in subMenuItems(item.index)" 
-                                    :key="subIndex" 
-                                    :index="subItem.index" >>
-                                    {{ subItem.label }}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </li>
+                </div>
             </ul>
         </div>
-    </el-menu>
+    </div>
 </template>
 
 
 <script >
-import { defineComponent, computed, reactive } from 'vue';
-// //导入菜单选项配置文件
-import config from '../config/config.json';
+import { defineComponent, ref } from 'vue';
+import router from '@/router';
 
 export default defineComponent({
     name: 'TopBar',
     setup() {
-        // 使用 reactive 确保 menuItems 是响应式的
-        const menuItems = reactive(config.menuItems);
-
-        const hasSubMenuItems = computed(() => { //返回所有mainMenu为'hasSub'的菜单项
-            return menuItems.filter(item => item.mainMenu === 'hasSub');
-        });
-        const noSubMenuItems = computed(() => { //返回所有mainMenu为'noSub'的菜单项
-            return menuItems.filter(item => item.mainMenu === 'noSub');
-        });
-        const subMenuItems = (mainMenuIndex) => { //返回与指定mainMenuIndex匹配的子菜单项。
-            return menuItems.filter(item => item.mainMenu === mainMenuIndex)
-        };
+        // 使用 ref 来定义响应式数据
+        const isDropdownVisible = ref(false);
         // 切换下拉框显示状态
-        const toggleDropdown = (index) => {
-            const item = hasSubMenuItems.value[index];
-            console.log(item.index);
-            item.isDropdownVisible = !item.isDropdownVisible; // 切换显示状态
-            console.log(item.isDropdownVisible);
+        const toggleDropdown = () => {
+            isDropdownVisible.value = !isDropdownVisible.value; // 切换显示状态
+            console.log(isDropdownVisible.value);
         };
 
         return {
-            menuItems,
-            hasSubMenuItems,
-            noSubMenuItems,
-            subMenuItems,
+            isDropdownVisible,
             toggleDropdown
         }
+    },
+    methods: {
+        toHomePage() {
+            router.push("HomePage");
+        },
+        toFindPage() {
+            router.push("FindPage");
+        },
+        toChatPage() {
+            router.push("ChatPage");
+        },
+        toPersonalPage() {
+            router.push("PersonalPage");
+        },
+        toAboutUsPage() {
+            router.push("AboutUsPage");
+        },
+        toNewRoomPage() {
+            router.push("NewRoomPage");
+        },
     }
     
 });
 </script>
 
 <style lang="css" scoped>
-.navbar-text{
-    display: flex;
-    flex-direction: row;
-}
 .top-rectangle {
     /* position: fixed; */
     top: 0;
@@ -94,21 +89,20 @@ export default defineComponent({
 .topbar {
     /* position: fixed; */
     top: -20px;
-    height: 70px;
-    width: 77%;
+    height: 90px;
+    width: 80%;
     position: relative; 
-    left: 20%;   /* 使其从左边开始，20%的空白，使其居中 */
     /* 设置元素的边框圆角半径 */
     border-radius: 30px;  
+    /* 使其从左边开始，10%的空白，使其居中 */
     left: 10%;
-    right: 10%;
     box-shadow: 0 0 6px rgba(50, 50, 50, 0.26);
     display: flex;
     justify-content: space-between;
 }
 .logo {
-    width: 140px;
-    height: auto;
+    width: 180px;
+    margin-left: 10px;
     margin-right: 20px;
 }
 .navbar{
@@ -119,12 +113,21 @@ export default defineComponent({
     list-style: none;
     display: flex;
     gap: 50px;
+    align-items: center; /* 垂直居中对齐 */
     margin-right: 20px;
-    margin-top: 10px;
+    margin-top: 15px;
 }
-a {
-    text-decoration: none;  /* 去除链接的下划线 */
-    color: inherit;         /* 继承父元素的文本颜色 */
+.nav-items button {
+    background: none; 
+    border: none;
+    font-size: 20px;
+    cursor: pointer; /* 设置鼠标悬停时的指针 */
+    transition: background-color 0.3s; /* 添加过渡效果 */
+}
+/* 鼠标悬停时，改变背景颜色 */
+.nav-items button:hover {
+    color: #007BFF; /* 鼠标悬停时的字体颜色 */
+    font-weight: bold; /* 鼠标悬停时加粗字体 */
 }
 .dropdown {
     position: absolute;
@@ -132,7 +135,6 @@ a {
     background-color: #fff;
     border: 1px solid #ccc;
     padding: 10px;
-    /* display: block; */
     width: 70px; 
     border-radius: 5px; /* 圆角边框 */
 }
@@ -142,16 +144,18 @@ a {
     margin: 0;
 }
 /* 每一项（li） */
-.dropdown li {
-    font-size: 14px; 
+.dropdown button {
+    font-size: 16px; 
     font-family: 'Arial', sans-serif; 
-    font-weight: normal; 
+    font-weight: normal;
+    background: none; 
+    border: none;
     padding: 4px 0; 
     cursor: pointer; /* 设置鼠标悬停时的指针 */
     transition: background-color 0.3s; /* 添加过渡效果 */
 }
 /* 鼠标悬停时，改变背景颜色 */
-.dropdown li:hover {
+.dropdown button:hover {
     background-color: #f0f0f0; /* 设置鼠标悬停时的背景色 */
     color: #007BFF; /* 鼠标悬停时的字体颜色 */
     font-weight: bold; /* 鼠标悬停时加粗字体 */
