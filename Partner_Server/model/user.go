@@ -9,7 +9,7 @@ type User struct {
 	UImage  string `gorm:"column:uimage;not null" gorm:"comment:保存用户头像路径"`
 }
 
-type Gz struct {
+type Gz struct { //关注配对数据结构
 	Gzid  uint `gorm:"column:gz_id;;not null;primaryKey"`
 	Bgzid uint `gorm:"column:bgz_id;;not null;primaryKey"`
 }
@@ -17,4 +17,9 @@ type Gz struct {
 type EmailMessage struct {
 	Email string `json:"email"`
 	Code  string `json:"code"`
+}
+
+type ScheduleItem struct { //行程返回数据结构
+	Date    string `json:"date"`    // 日期，字符串形式
+	Content string `json:"content"` // 行程具体内容，字符串形式
 }
