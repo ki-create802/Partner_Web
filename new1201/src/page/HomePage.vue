@@ -1,5 +1,5 @@
 <template>
-  <GuideBar />
+  <TopBar />
   <div class="mybody">
     <div class="left">
       <CarouselImage :images="images" />
@@ -27,17 +27,17 @@
 </template>
 
 <script>
-import GuideBar from '@/components/GuideBar.vue';
 import ACalendar from '@/components/ACalendar.vue';
 import CarouselImage from '@/components/CarouselImage.vue';
 import SearchBox from '@/components/SearchBox.vue';
 import FindListItem from '@/components/FindListItem.vue';
+import TopBar from '@/components/TopBar.vue';
 import axios from 'axios';
 
 export default {
   name: 'HomePage',
   components: {
-    GuideBar,
+    TopBar,
     ACalendar,
     CarouselImage,
     SearchBox,
