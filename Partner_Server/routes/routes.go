@@ -24,6 +24,7 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		userRoutes.GET("info", userController.Info)                          //返回用户信息
 		userRoutes.POST("forgot-password", userController.ForgotPassword)    //忘记密码
 		userRoutes.POST("verify-reset-code", userController.VerifyResetCode) //验证验证码
+		userRoutes.GET("schedule", userController.Schedule)                  //推送行程
 	}
 
 	chatController := controller.NewChatController()
@@ -35,6 +36,9 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		chatRoutes.POST("leaveChatRoom", chatController.LeaveChatRoom)     //退出群聊
 		chatRoutes.POST("addMember", chatController.AddMember)             //添加成员到uc_match表中
 		chatRoutes.POST("getSpeakers", chatController.GetSpeakers)         //返回发言成员列表（uc_match信息）
+		chatRoutes.POST("searchChatList", chatController.SearchChatList)   //返回聊天室匹配结果
+		chatRoutes.POST("searchUser", chatController.SearchUser)           //返回用户匹配结果
+		chatRoutes.POST("createChat", chatController.CreateChat)           //创建聊天室
 	}
 
 	fileController := controller.NewFileController()

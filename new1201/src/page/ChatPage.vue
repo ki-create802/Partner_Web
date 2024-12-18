@@ -1,14 +1,14 @@
 <template>
-    <GuideBar />
+    <TopBar />
     <h1>聊天室界面</h1>
 </template>
 
 <script>
-import GuideBar from '../components/GuideBar.vue';
+import TopBar from '../components/TopBar.vue';
 export default{
     name:'ChatPage',
     components:{
-        GuideBar,
+        TopBar,
     }
 }
 </script>

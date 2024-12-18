@@ -5,6 +5,8 @@ import (
 	"Partner_Web/Partner_Server/model"
 	"fmt"
 
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	//"golang.org/x/crypto/bcrypt"
@@ -21,6 +23,7 @@ type InChatController interface {
 	LeaveChatRoom(c *gin.Context)   //退出群聊
 	AddMember(c *gin.Context)       //添加成员到uc_match表中
 	GetSpeakers(c *gin.Context)     //返回发言成员列表
+	CreateChat(c *gin.Context)      //创建聊天室
 }
 
 func NewChatController() InChatController {
@@ -57,10 +60,11 @@ func (b ChatController) SearchChatList(c *gin.Context) { //未测试
 	}
 
 	//获取聊天室信息
-	var chatList []model.ChatInfo     //聊天室数据
+	var chatList []model.ChatSearch   //聊天室数据
 	if queryString.SearchInfo != "" { //字符串不为空 匹配聊天室名称
 		if IsAll { //筛选全部
 			result := b.DB.Table("chatinfo").
+				Where("cstate =?", 1).
 				Where("cname LIKE ? OR cremark LIKE ?", "%"+queryString.SearchInfo+"%", "%"+queryString.SearchInfo+"%").
 				Find(&chatList)
 			if result.Error != nil {
@@ -70,6 +74,7 @@ func (b ChatController) SearchChatList(c *gin.Context) { //未测试
 		} else { //多一个版块筛选
 			result := b.DB.Table("chatinfo").
 				Where("bid = ?", blockID).
+				Where("cstate =?", 1).
 				Where("cname LIKE ? OR cremark LIKE ?", "%"+queryString.SearchInfo+"%", "%"+queryString.SearchInfo+"%").Find(&chatList)
 			if result.Error != nil {
 				common.Fail(c, 500, nil, "版块搜索词数据库查询错误")
@@ -78,13 +83,18 @@ func (b ChatController) SearchChatList(c *gin.Context) { //未测试
 		}
 	} else { //为空就是全部推送，再判断block
 		if IsAll { //全部推送
-			result := b.DB.Table("chatinfo").Find(&chatList)
+			result := b.DB.Table("chatinfo").
+				Where("cstate =?", 1).
+				Find(&chatList)
 			if result.Error != nil {
 				common.Fail(c, 500, nil, "全部聊天室数据库查询错误")
 				return
 			}
 		} else { //推送对应板块所有记录
-			result := b.DB.Table("chatinfo").Where("bid = ?", blockID).Find(&chatList)
+			result := b.DB.Table("chatinfo").
+				Where("cstate =?", 1).
+				Where("bid = ?", blockID).
+				Find(&chatList)
 			if result.Error != nil {
 				common.Fail(c, 500, nil, "版块数据库查询错误")
 				return
@@ -313,4 +323,37 @@ func (b ChatController) GetSpeakers(c *gin.Context) {
 	}
 
 	common.Success(c, gin.H{"speakerList": speakerList}, "成功返回发言成员列表")
+}
+func (b ChatController) CreateChat(c *gin.Context) { //创建聊天室 版块传消息的类型
+	var requestChat model.Room
+	c.Bind(&requestChat)
+	//var BID_Info struct { //定义一个结构体接收版块id
+	//	BID int `gorm:"column:bid"`
+	//}
+	//result := b.DB.Table("block").Select("bid").Where("bname =?", block).First(&BID_Info)
+	//if result.Error != nil {
+	//	common.Fail(c, 500, nil, "查询数据库错误")
+	//	return
+	//}
+
+	currentTime := time.Now() //获取当前时间
+
+	newChat := model.Room{
+		Name:        requestChat.Name,
+		Bid:         requestChat.Bid,
+		Uid:         requestChat.Uid,
+		Cnumber:     requestChat.Cnumber,
+		Cstate:      1,
+		CYueDate:    requestChat.CYueDate,
+		CCreateTime: currentTime,
+		Cremark:     requestChat.Cremark,
+	}
+
+	result := b.DB.Table("chatinfo").Create(&newChat)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "新增聊天室信息数据库错误")
+		return
+	}
+
+	common.Success(c, gin.H{"newChat": newChat}, "成功新建聊天室") //返回的cid没有值，但是数据库里是自增长的
 }

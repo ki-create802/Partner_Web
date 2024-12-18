@@ -6,7 +6,6 @@ import (
 	"Partner_Web/Partner_Server/pkg/redis"
 	"Partner_Web/Partner_Server/services"
 	"Partner_Web/Partner_Server/utils"
-	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -28,6 +27,7 @@ type InUserController interface {
 	Info(c *gin.Context)            //返回用户信息
 	ForgotPassword(c *gin.Context)  //忘记密码
 	VerifyResetCode(c *gin.Context) //验证验证码
+	Schedule(c *gin.Context)        //首页行程推送
 }
 
 func NewUserController() InUserController {
@@ -44,12 +44,11 @@ func (a UserController) Register(c *gin.Context) { //未完成
 	var requestUser model.User
 	// 将请求中的JSON数据绑定到User结构体中，方便后续操作
 	c.Bind(&requestUser)
-	userid := requestUser.UID
 	userName := requestUser.UName
 	userEmail := requestUser.UEmail
 	password := requestUser.UKey
-	userremark := requestUser.URemark
-	userimage := requestUser.UImage
+	//userremark := requestUser.URemark
+	//userimage := requestUser.UImage //暂时是为空的！！！！！！！！！！！！都不需要传 来一个默认的
 
 	//加个注册验证邮箱
 
@@ -66,24 +65,22 @@ func (a UserController) Register(c *gin.Context) { //未完成
 
 	// 创建用户
 	newUser := model.User{
-		UID:    userid,
 		UName:  userName,
 		UEmail: userEmail,
 		//Password:    string(hashedPassword),
-		UKey:    password,
-		URemark: userremark,
-		UImage:  userimage,
+		UKey: password,
+		//URemark: userremark,
+		//UImage:  userimage,
 	}
 	a.DB.Table("user").Create(&newUser)
 	//***********************************************************
-	//还缺少的功能 分配用户id 自增长
 	//密码加密功能
 	//对于用户名要不要不让重复
 	//默认头像图标11111111111111111111111111111111111111111111
 	//************************************************************
 
 	// 返回成功响应
-	common.Success(c, nil, "注册成功")
+	common.Success(c, gin.H{"newUser": newUser}, "注册成功")
 }
 
 // Login 登录
@@ -138,6 +135,17 @@ func (a UserController) GuanZhu(c *gin.Context) {
 	c.Bind(&requestUser)
 	gzid := requestUser.Gzid
 	bgzid := requestUser.Bgzid
+
+	// 判断 gzid 是否为 0
+	if gzid == 0 {
+		common.Fail(c, 400, nil, "输入Gzid 为零或为字符串")
+		return
+	}
+	// 判断 bgzid 是否为 0
+	if bgzid == 0 {
+		common.Fail(c, 400, nil, "输入Bgzid 为零或为字符串")
+		return
+	}
 
 	// 创建用户
 	newMatch := model.Gz{
@@ -276,7 +284,7 @@ func (a UserController) VerifyResetCode(c *gin.Context) {
 	email := message.Email
 	code := message.Code
 
-	fmt.Println("email: ", email, " code: ", code)
+	//fmt.Println("email: ", email, " code: ", code)
 
 	redisClient := redis.NewRedisClient()
 	storedCode, err := redisClient.GetCode(email)
@@ -296,4 +304,96 @@ func (a UserController) VerifyResetCode(c *gin.Context) {
 		//fmt.Println("success!------", storedCode, " : ", code)
 		common.Success(c, gin.H{"message": "Verification successful. You can reset your password now."}, "验证码匹配成功")
 	}
+}
+
+func (a UserController) Schedule(c *gin.Context) { //返回用户行程
+	session := sessions.Default(c)  //获取会话
+	userID := session.Get("userID") //获取ID
+	if userID == nil {
+		common.Fail(c, 422, nil, "用户未登录")
+		return
+	}
+	//查询加入的房间
+	var cidList1 []struct {
+		Cid uint `gorm:"column:cid"`
+	}
+	var cidList2 []struct {
+		Cid uint `gorm:"column:cid"`
+	}
+
+	result := a.DB.Table("success_match").
+		Select("cid").
+		Where("uid = ?", userID).
+		Find(&cidList1)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "数据库查询房间号错误")
+		return
+	}
+
+	//查询为房主的房间信息
+	result = a.DB.Table("chatinfo").
+		Select("cid").
+		Where("uid=?", userID).
+		Where("cstate = ?", 1). //进行状态
+		Find(&cidList2)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "数据库查询房间号错误")
+		return
+	}
+
+	var cidList []uint
+
+	//合并两组房间号
+	for _, v := range cidList1 {
+		cidList = append(cidList, v.Cid)
+	}
+	for _, v := range cidList2 {
+		cidList = append(cidList, v.Cid)
+	}
+
+	if len(cidList) == 0 {
+		common.Success(c, nil, "暂无行程")
+		return
+	}
+
+	var ChatList []struct { //先取出版块id和日期
+		Bid      int    `gorm:"column:bid"`
+		CYueDate string `gorm:"column:c_yue_date"`
+	}
+
+	result = a.DB.Table("chatinfo").
+		Select("bid, c_yue_date").
+		Where("cstate = ?", 1). //进行状态
+		Where("cid IN (?)", cidList).
+		Find(&ChatList)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "数据库查询聊天室信息错误")
+		return
+	}
+	if len(ChatList) == 0 {
+		common.Success(c, nil, "暂无进行中的行程")
+		return
+	}
+
+	var ScheduleList []model.ScheduleItem
+	for _, chat := range ChatList {
+		var Block struct {
+			Bname string `gorm:"column:bname"`
+		}
+		result = a.DB.Table("block").
+			Select("bname").
+			Where("bid = ?", chat.Bid).
+			First(&Block)
+		if result.Error != nil {
+			common.Fail(c, 500, nil, "数据库查询错误")
+			return
+		}
+
+		scheduleItem := model.ScheduleItem{
+			Date:    chat.CYueDate,
+			Content: Block.Bname,
+		}
+		ScheduleList = append(ScheduleList, scheduleItem) //在上面房主的基础上加
+	}
+	common.Success(c, gin.H{"ScheduleList": ScheduleList}, "返回行程成功")
 }

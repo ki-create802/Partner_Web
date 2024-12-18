@@ -1,6 +1,6 @@
 <template>
     <div class="topbar">
-        <GuideBar />
+        <TopBar />
     </div>
     <div class="user-info">
         <InformationBox />
@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import GuideBar from '../components/GuideBar.vue';
+import TopBar from '../components/TopBar.vue';
 import InformationBox from '../components/InformationBox.vue';
 
 export default {
@@ -52,7 +52,7 @@ export default {
         }
     },
     components: {
-        GuideBar,
+        TopBar,
         InformationBox,
     },
 }
@@ -102,8 +102,8 @@ export default {
     color: white;
 }
 .tab-content {
-    width: 1000px;
-    height: 575px;
+    width: 1300px;
+    height: 650px;
     border: 1.5px solid #000000;
 }
 .wait-content {
