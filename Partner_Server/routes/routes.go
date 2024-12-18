@@ -29,9 +29,18 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 	chatController := controller.NewChatController()
 	chatRoutes := r.Group("/chat")
 	{
-		chatRoutes.POST("searchChatList", chatController.SearchChatList) //返回聊天室匹配结果
-		chatRoutes.POST("searchUser", chatController.SearchUser)         //返回用户匹配结果
+		chatRoutes.POST("searchChatList", chatController.SearchChatList)   //返回聊天室匹配结果
+		chatRoutes.POST("searchUser", chatController.SearchUser)           //返回用户匹配结果
+		chatRoutes.POST("disbandChatRoom", chatController.DisbandChatRoom) // 房主解散群聊
+		chatRoutes.POST("leaveChatRoom", chatController.LeaveChatRoom)     //退出群聊
+		chatRoutes.POST("addMember", chatController.AddMember)             //添加成员到uc_match表中
+		chatRoutes.POST("getSpeakers", chatController.GetSpeakers)         //返回发言成员列表（uc_match信息）
 	}
 
+	fileController := controller.NewFileController()
+	fileRoutes := r.Group("/file")
+	{
+		fileRoutes.POST("uploadAvatar", fileController.UploadAvatar) // 上传头像
+	}
 	return r
 }

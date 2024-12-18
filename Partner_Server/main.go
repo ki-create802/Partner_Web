@@ -5,14 +5,15 @@ import (
 	"Partner_Web/Partner_Server/routes"
 	"context"
 	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 	"os/exec"
 	"sync"
 	"time"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
 
 	//"github.com/gin-gonic/gin"
 	//"net/http"
@@ -85,6 +86,9 @@ func main() {
 	r.Use(sessions.Sessions("mysession", store))
 	// 启动路由
 	routes.CollectRoutes(r)
+
+	// 配置静态文件服务(上传头像)
+	r.Static("/avatars", "./avatars")
 
 	//// 启动服务
 	//panic(r.Run(":8082"))
