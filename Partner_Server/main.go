@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	//"github.com/gin-gonic/gin"
 	//"net/http"
 	_ "github.com/go-sql-driver/mysql"
@@ -81,6 +82,9 @@ func main() {
 
 	//创建路由
 	r := gin.Default()
+
+	r.Use(cors.Default())
+
 	//注册回会话中间件
 	r.Use(sessions.Sessions("mysession", store))
 	// 启动路由

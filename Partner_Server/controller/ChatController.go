@@ -18,6 +18,7 @@ type InChatController interface {
 	SearchChatList(c *gin.Context) //搜索返回匹配聊天室
 	SearchUser(c *gin.Context)     //搜索返回匹配用户
 	CreateChat(c *gin.Context)     //创建聊天室
+	ChatRecords(c *gin.Context)    //返回聊天记录
 }
 
 func NewChatController() InChatController {
@@ -75,7 +76,7 @@ func (b ChatController) SearchChatList(c *gin.Context) { //未测试
 				return
 			}
 		}
-	} else { //为空就是全部推送，再判断block
+	} else {       //为空就是全部推送，再判断block
 		if IsAll { //全部推送
 			result := b.DB.Table("chatinfo").
 				Where("cstate =?", 1).
@@ -217,4 +218,8 @@ func (b ChatController) CreateChat(c *gin.Context) { //创建聊天室 版块传
 	}
 
 	common.Success(c, gin.H{"newChat": newChat}, "成功新建聊天室") //返回的cid没有值，但是数据库里是自增长的
+}
+
+func (b ChatController) ChatRecords(c *gin.Context) {
+	
 }

@@ -33,6 +33,7 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		chatRoutes.POST("searchChatList", chatController.SearchChatList) //返回聊天室匹配结果
 		chatRoutes.POST("searchUser", chatController.SearchUser)         //返回用户匹配结果
 		chatRoutes.POST("createChat", chatController.CreateChat)         //创建聊天室
+		chatRoutes.GET("chatRecords", chatController.ChatRecords)        //返回聊天记录
 	}
 
 	return r
