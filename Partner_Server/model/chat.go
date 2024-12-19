@@ -33,3 +33,13 @@ type Member struct {
 	MemberID  int    `gorm:"column:uid" json:"memberID"`
 	MemberImg string `gorm:"-" json:"memberImg"`
 }
+
+type SuccessMatch struct {
+	CID uint `gorm:"column:cid;not null;primaryKey"`
+	UID uint `gorm:"column:uid;not null;primaryKey"`
+}
+
+type UcMatch struct {
+	CID uint `gorm:"column:cid;not null;primaryKey"`
+	UID uint `gorm:"column:uid;not null;primaryKey"`
+}
