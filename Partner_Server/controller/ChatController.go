@@ -17,14 +17,17 @@ type ChatController struct {
 }
 
 type InChatController interface {
-	SearchChatList(c *gin.Context)  //搜索返回匹配聊天室
-	SearchUser(c *gin.Context)      //搜索返回匹配用户
-	CreateChat(c *gin.Context)      //创建聊天室
-	ChatRecords(c *gin.Context)     //返回聊天记录
+	SearchChatList(c *gin.Context) //搜索返回匹配聊天室
+	SearchUser(c *gin.Context)     //搜索返回匹配用户
+	CreateChat(c *gin.Context)     //创建聊天室
+	ChatRecords(c *gin.Context)    //返回聊天记录
+
 	DisbandChatRoom(c *gin.Context) //房主解散群聊
 	LeaveChatRoom(c *gin.Context)   //退出群聊
 	AddMember(c *gin.Context)       //添加成员到uc_match表中
 	GetSpeakers(c *gin.Context)     //返回发言成员列表
+
+	SuccessMatch(c *gin.Context) //成功加入聊天室 添加到success_match表格中
 }
 
 func NewChatController() InChatController {
@@ -357,6 +360,36 @@ func (b ChatController) CreateChat(c *gin.Context) { //创建聊天室 版块传
 	}
 
 	common.Success(c, gin.H{"newChat": newChat}, "成功新建聊天室") //返回的cid没有值，但是数据库里是自增长的
+}
+
+func (b ChatController) SuccessMatch(c *gin.Context) { //添加成功匹配表
+	var request struct {
+		RoomID int `json:"roomID"`
+		UserID int `json:"userID"`
+	}
+	c.Bind(&request)
+
+	roomID := request.RoomID
+	userID := request.UserID
+
+	var count int64
+	b.DB.Table("success_match").Where("cid = ? AND uid = ?", roomID, userID).Count(&count)
+	if count > 0 {
+		common.Fail(c, 400, nil, "用户已与该聊天室成功配对")
+		return
+	}
+
+	newMatch := model.SuccessMatch{
+		CID: uint(roomID),
+		UID: uint(userID),
+	}
+	result := b.DB.Table("success_match").Create(&newMatch)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "添加成员失败")
+		return
+	}
+
+	common.Success(c, nil, "成员添加成功")
 }
 
 func (b ChatController) ChatRecords(c *gin.Context) {

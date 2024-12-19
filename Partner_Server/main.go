@@ -12,8 +12,6 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 
 	//"github.com/gin-gonic/gin"
@@ -78,16 +76,16 @@ func main() {
 	// 延迟关闭数据库
 	defer db.Close()
 
-	//初始化会话存储
-	store := cookie.NewStore([]byte("secret"))
+	// //初始化会话存储
+	// store := cookie.NewStore([]byte("secret"))
 
 	//创建路由
 	r := gin.Default()
 
 	r.Use(cors.Default())
 
-	//注册回会话中间件
-	r.Use(sessions.Sessions("mysession", store))
+	// //注册回会话中间件
+	// r.Use(sessions.Sessions("mysession", store))
 	// 启动路由
 	routes.CollectRoutes(r)
 

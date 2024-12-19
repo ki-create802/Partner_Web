@@ -6,10 +6,12 @@ import (
 	"Partner_Web/Partner_Server/pkg/redis"
 	"Partner_Web/Partner_Server/services"
 	"Partner_Web/Partner_Server/utils"
+	"fmt"
+	"time"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"time"
 	//"golang.org/x/crypto/bcrypt"
 )
 
@@ -101,11 +103,11 @@ func (a UserController) Login(c *gin.Context) {
 		return
 	}
 
-	var userID uint
-	userID = user.UID
-	session := sessions.Default(c) //获取会话
-	session.Set("userID", userID)  //将用户ID存储在会话中
-	session.Save()
+	//var userID uint
+	//userID = user.UID
+	//session := sessions.Default(c) //获取会话
+	//session.Set("userID", userID)  //将用户ID存储在会话中
+	//session.Save()
 
 	if user.UKey != password {
 		common.Fail(c, 422, nil, "密码错误")
@@ -166,11 +168,14 @@ func (a UserController) Logout(c *gin.Context) { //用户登出
 }
 
 // 返回粉丝数量  前端传入的数据是用户id 是可以只返回一个Uid的 用全局变量
-func (a UserController) FansNum(c *gin.Context) { //
-
-	session := sessions.Default(c)  //获取会话
-	userid := session.Get("userID") //获取ID
-
+func (a UserController) FansNum(c *gin.Context) {
+	var UserID struct {
+		Uid uint `json:"userID"`
+	}
+	c.Bind(&UserID)
+	userid := UserID.Uid
+	fmt.Println(UserID.Uid)
+	fmt.Println(userid)
 	// 数据验证
 	var user model.User
 	a.DB.Table("user").Where("uid=?", userid).First(&user)
@@ -187,13 +192,11 @@ func (a UserController) FansNum(c *gin.Context) { //
 	common.Success(c, gin.H{"fansNum": count}, "获取粉丝数成功")
 }
 
-func (a UserController) EditInfo(c *gin.Context) {
-
-	session := sessions.Default(c)  //获取会话
-	userid := session.Get("userID") //获取ID
+func (a UserController) EditInfo(c *gin.Context) { //修改未测试
 
 	var requestUser model.User //改什么传什么 用json
 	c.Bind(&requestUser)
+	userid := requestUser.UID
 	userName := requestUser.UName
 	userEmail := requestUser.UEmail
 	password := requestUser.UKey
@@ -224,15 +227,19 @@ func (a UserController) EditInfo(c *gin.Context) {
 }
 
 func (a UserController) Info(c *gin.Context) { //返回用户信息
-	session := sessions.Default(c)  //获取会话
-	userID := session.Get("userID") //获取ID
-	if userID == nil {
+	var UserID struct {
+		UID uint `json:"userID"`
+	}
+	c.Bind(&UserID)
+	userid := UserID.UID
+
+	if userid == 0 {
 		common.Fail(c, 422, nil, "用户未登录")
 		return
 	}
 
 	var user model.User
-	a.DB.Table("user").Where("uid=?", userID).First(&user)
+	a.DB.Table("user").Where("uid=?", userid).First(&user)
 	// 更新用户信息
 	infoOfUser := model.User{
 		UID:     user.UID,
@@ -307,9 +314,14 @@ func (a UserController) VerifyResetCode(c *gin.Context) {
 }
 
 func (a UserController) Schedule(c *gin.Context) { //返回用户行程
-	session := sessions.Default(c)  //获取会话
-	userID := session.Get("userID") //获取ID
-	if userID == nil {
+
+	var UserID struct {
+		UID uint `json:"userID"`
+	}
+	c.Bind(&UserID)
+	userid := UserID.UID
+
+	if userid == 0 {
 		common.Fail(c, 422, nil, "用户未登录")
 		return
 	}
@@ -323,7 +335,7 @@ func (a UserController) Schedule(c *gin.Context) { //返回用户行程
 
 	result := a.DB.Table("success_match").
 		Select("cid").
-		Where("uid = ?", userID).
+		Where("uid = ?", userid).
 		Find(&cidList1)
 	if result.Error != nil {
 		common.Fail(c, 500, nil, "数据库查询房间号错误")
@@ -333,7 +345,7 @@ func (a UserController) Schedule(c *gin.Context) { //返回用户行程
 	//查询为房主的房间信息
 	result = a.DB.Table("chatinfo").
 		Select("cid").
-		Where("uid=?", userID).
+		Where("uid=?", userid).
 		Where("cstate = ?", 1). //进行状态
 		Find(&cidList2)
 	if result.Error != nil {
