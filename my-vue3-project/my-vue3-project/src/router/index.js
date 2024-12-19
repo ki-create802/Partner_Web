@@ -47,6 +47,11 @@ const routes = [
     name: 'PersonalPage',
     component: PersonalPage
   },
+  {
+    path: '/CreateChatPage',
+    name: 'CreateChatPage',
+    component: PersonalPage
+  },
 
 ];
 
