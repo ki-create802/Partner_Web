@@ -1,6 +1,7 @@
 <!-- src/components/ACalendar.vue -->
 <template>
   <div class="calendar">
+    <h1>我的行程</h1>
     <div class="header">
       <button @click="prevMonth">&lt;</button>
       <span>{{ currentMonthName }} {{ currentYear }}</span>
@@ -20,8 +21,7 @@
 
 <script>
 import ScheduleList from './ScheduleList.vue';
-import axios from 'axios';
-
+import { api_ScheduleItems } from '@/api.js';
 export default {
   name: 'ACalendar',
   components: {
@@ -34,12 +34,6 @@ export default {
       daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       scheduleItems: [
         { date: '10.01', content: '默认行程' },
-        { date: '10.05', content: '默认行程' },
-        { date: '10.10', content: '默认行程' },
-        { date: '10.01', content: '默认行程' },
-        { date: '10.05', content: '默认行程' },
-        { date: '10.10', content: '默认行程' }
-
       ]
     };
   },
@@ -79,22 +73,17 @@ export default {
     async fetchScheduleItems() {
       // 从本地存储中获取用户信息
       try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
+        const user = JSON.parse(localStorage.getItem('user')) ;
+        if (user==null) {
+          alert("无法获取本地用户信息");
           console.error('User information not found in local storage.');
           return;
         }
-        const uid = user.UID;
       //向后端发送请求个人日程请求
-      
-        const response = await axios.get('http://localhost:3000/api/schedule', 
-        {
-          params:{
-            Uid: uid,
-          },
-        });
-        this.scheduleItems = response.data;
+        const data=await api_ScheduleItems(user.UID);
+        this.scheduleItems=data;
       } catch (error) {
+        alert("获取个人行程失败");
         console.error('There was an error fetching the schedule items!', error);
       }
     },
@@ -130,9 +119,10 @@ export default {
 
 <style scoped>
 .calendar {
+  background-color: rgb(221, 250, 255);
   width: 300px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 5px solid #a0f1ff;
+  border-radius: 20px;
   padding: 10px;
 }
 
@@ -142,11 +132,16 @@ export default {
   align-items: center;
   margin-bottom: 10px;
 }
-
+.header button{
+  background-color: #ffffff;
+  border:none;
+}
 .days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   margin-bottom: 10px;
+  font-size: 24px;
+  color: rgb(0, 117, 184);
 }
 
 .day-name {
@@ -156,7 +151,7 @@ export default {
 .dates {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
+  gap: 10px;
 }
 
 .date {
@@ -169,6 +164,7 @@ export default {
   border: none;
   background-color: transparent;
   cursor: pointer;
+  font-size: 20px;
 }
 
 .date.selected button {
@@ -180,6 +176,6 @@ export default {
 .date.today button {
   background-color: #ffc107;
   color: white;
-  border-radius: 4px;
+  border-radius: 40%;
 }
 </style>

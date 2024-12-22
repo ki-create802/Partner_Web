@@ -1,5 +1,5 @@
 <template>
-    <TopBar />
+    <GuideBar />
     <div class="welcome-wrap">
         <div class="welcome-text">
             <p>欢迎来到约吧！</p>
@@ -39,7 +39,7 @@ import TopBar from '../components/TopBar.vue';
 export default{
     name:'AboutUsPage',
     components:{
-      TopBar,
+      GuideBar,
     },
     data(){
       return {

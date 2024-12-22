@@ -1,5 +1,5 @@
 <template>
-    <body v-if="item">
+    <div class="totalcontainer" v-if="item">
         <div class="body">
             <left>
                 <a>房间号：{{ item.roomID }}</a>
@@ -7,10 +7,10 @@
                 <a class="roomIntro">{{ item.roomIntro }}</a>
             </left>
             <right>
-                <img v-for="(image, index) in item.images" :key="index" :src="image" />
+                <img v-for="(image, index) in item.images" :key="index" :src="'http://localhost:3000/'+image" />
             </right>
         </div>
-    </body>
+    </div>
 </template>
 
 <script>
@@ -42,9 +42,9 @@ export default {
 </script>
 
 <style scoped>
-body {
+.totalcontainer {
     height: 100px;
-    background-color: #ffffff8e;
+    background-color: #ffffff48;
     border-radius: 16px;
     padding: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);

@@ -1,6 +1,6 @@
 <template>
     <div class="userItem">
-      <img class="userImage" :src="user.UImage" alt="User Image" />
+      <img class="userImage" :src="'http://localhost:3000/'+user.UImage" alt="User Image" />
       <div class="userInfo">
         <a class="userName">用户名：{{ user.UName }}</a>
         <a class="userRemark">个性签名：{{ user.URemark }}</a>

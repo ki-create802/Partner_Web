@@ -1,6 +1,6 @@
 <!-- src/components/GuideBar.vue -->
 <template>
-    <body>
+    <div>
       <div class="mybackground">
         <div class="searchbody">
           <div class="left">
@@ -21,7 +21,7 @@
           </div>
         </div>
       </div>
-    </body>
+    </div>
   </template>
   
   <script>
@@ -72,7 +72,7 @@
   
   <style scoped>
   .mybackground {
-    background: linear-gradient(to bottom, rgba(91, 181, 255, 0.2), rgba(255, 255, 255, 0.2));
+    background: linear-gradient(to bottom, rgb(9, 100, 175), rgba(255, 255, 255, 0));
     padding: 20px;
   }
   
