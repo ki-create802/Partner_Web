@@ -40,6 +40,9 @@ func (b ChatController) SearchChatList(c *gin.Context) { //未测试
 	var queryString model.SearchString
 	c.Bind(&queryString)
 
+	fmt.Println("query:", queryString.SearchInfo)
+	fmt.Println("range:", queryString.Block)
+
 	//获取板块信息
 	var IsAll bool
 	var blockID int
@@ -169,6 +172,7 @@ func (b ChatController) SearchChatList(c *gin.Context) { //未测试
 		}
 		searchResults = append(searchResults, room)
 	}
+	fmt.Println("searchResults", searchResults)
 	common.Success(c, gin.H{"searchResults": searchResults}, "成功返回聊天室列表")
 }
 
@@ -188,8 +192,14 @@ func (b ChatController) SearchUser(c *gin.Context) {
 			return
 		}
 	} else {
-		common.Fail(c, 400, nil, "请输入相关用户关键词")
-		return
+		// common.Fail(c, 400, nil, "请输入相关用户关键词")
+		// return
+		result := b.DB.Table("user").Select("uid,uname,uremark,uimage").
+			Find(&userList)
+		if result.Error != nil {
+			common.Fail(c, 500, nil, "用户查询数据库错误")
+			return
+		}
 	}
 
 	common.Success(c, gin.H{"userList": userList}, "成功返回用户列表")

@@ -30,14 +30,16 @@
 
 <script>
 import axios from 'axios';
+import { getFansNum } from '@/api.js';
+
 export default {
   name: 'InformationBox',
   data() {
     return{
-      avatarUrl: require("@/assets/avatar.png"), // 默认头像
-      username: localStorage.getItem('userUName')||'张三',
+      avatarUrl:JSON.parse(localStorage.getItem('user')).UImage ||require("@/assets/avatar.png"), // 默认头像
+      username: JSON.parse(localStorage.getItem('user')).UName||'默认用户名',
       followersCount: 2000,
-      signature: localStorage.getItem('userURemark') ||'这是我的个性签名',
+      signature: JSON.parse(localStorage.getItem('user')).URemark ||'默认个性签名',
     };
   },
   methods: {
@@ -82,41 +84,17 @@ export default {
         console.error('保存签名失败:', error);
       });
     },
-    //初始化时从 localStorage 获取数据
-    // mounted() {
-    //   const savedusername = localStorage.getItem('userusername');
-    //   if (savedusername) {
-    //     this.username = savedusername;
-    //   }
-    //   const savedSignature = localStorage.getItem('userSignature');
-    //   if (savedSignature) {
-    //     this.signature = savedSignature;
-    //   }
-    //   const savedAvatar = localStorage.getItem('userAvatar');
-    //   if (savedAvatar) {
-    //     this.avatarUrl = savedAvatar;
-    //   }
-    // }
-    // 获取用户信息
-    fetchUserInfo() {
-      axios.get('http://localhost:8082/user/info', {
-        params: {
-          userID: localStorage.getItem('userID') // 假设用户 ID 为 1，实际应从登录状态中获取
-        }
-      })
-          .then(response => {
-            const user = response.data.data.user;
-            this.avatarUrl = user.UImage; // 更新头像
-            this.username = user.UName; // 更新昵称
-            this.signature = user.URemark; // 更新签名
-          })
-          .catch(error => {
-            console.error('获取用户信息失败:', error);
-          });
+    async getFansNum_(){
+      try{
+        const fanNum=await getFansNum();
+        this.followersCount=fanNum;
+      }catch{
+        alert("请求粉丝数失败");
+      }
     }
   },
   mounted() {
-    this.fetchUserInfo(); // 组件挂载时获取用户信息
+    this.getFansNum_();
   }
 }
 </script>

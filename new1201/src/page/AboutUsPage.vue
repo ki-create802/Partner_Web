@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import TopBar from '../components/TopBar.vue';
+import GuideBar from '@/components/GuideBar.vue';
 export default{
     name:'AboutUsPage',
     components:{

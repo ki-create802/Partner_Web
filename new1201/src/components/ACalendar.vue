@@ -76,12 +76,11 @@ export default {
         const user = JSON.parse(localStorage.getItem('user')) ;
         if (user==null) {
           alert("无法获取本地用户信息");
-          console.error('User information not found in local storage.');
           return;
         }
       //向后端发送请求个人日程请求
         const data=await api_ScheduleItems(user.UID);
-        this.scheduleItems=data;
+        this.scheduleItems=data.ScheduleList;
       } catch (error) {
         alert("获取个人行程失败");
         console.error('There was an error fetching the schedule items!', error);

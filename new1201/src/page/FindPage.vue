@@ -1,6 +1,6 @@
 <template>
   <body>
-    <TopBar />
+    <GuideBar />
     <div class="searchContainer">
       <SearchBox class="searchBox" :initialQuery="searchQuery" :initialScope="searchScope" @search="handleSearch" />
     </div>
@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import TopBar from '../components/TopBar.vue';
+import GuideBar from '../components/GuideBar.vue';
 import SearchBox from '../components/SearchBox.vue';
 import FindListItem from '../components/FindListItem.vue';
 import UserListItem from '../components/UserListItem.vue'; // 引入 UserListItem 组件
@@ -42,7 +42,7 @@ import {search,searchUsers} from '@/api.js'
 export default {
   name: 'FindPage',
   components: {
-    TopBar,
+    GuideBar,
     SearchBox,
     FindListItem,
     UserListItem, // 注册 UserListItem 组件

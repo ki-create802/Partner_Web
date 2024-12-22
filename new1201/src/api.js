@@ -1,13 +1,16 @@
 // src/api/api.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:8082';
 
 // 获取聊天列表
+/*
+*/
 export const getChatsList = async (uid, searchWord) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/chats`, {
-      params: { uid, searchWord },
+    const response = await axios.post(`${API_BASE_URL}/chats`, {
+      uid,
+      searchWord,
     });
     return response.data;
   } catch (error) {
@@ -111,10 +114,10 @@ export const fetchHotData = async () => {
 };
 
 /*搜索功能
-request get 
-    Searchword(string)
-    Range(string)
-response (和热门数据返回内容的格式相同)
+request post 
+    query(string)
+    range(string)
+response (和热门数据返回内容的格式相同是个List)
     roomID (Number), 
     roomName (string)
     roomIntro (string)
@@ -124,20 +127,23 @@ response (和热门数据返回内容的格式相同)
         memberId,memberId...
 */
 export const search = async (query, scope) => {
+  if(!query)query="";
   try {
-    const response = await axios.get(`${API_BASE_URL}/search`, {
-      params: { Searchword: query, Range: scope },
+    const response = await axios.post(`${API_BASE_URL}/chat/searchChatList`, {
+      query, 
+      range: scope
     });
-    return response.data;
+    if(response.data.data==null)return [];
+    else return response.data.data.searchResults;
   } catch (error) {
-    console.error('Error searching:', error);
+    alert('搜索错误:'+error);
     throw error;
   }
 };
 
 
 /*用户搜索
-request get
+request post
   searchWord(string)
 respone
   UID (number)
@@ -147,10 +153,11 @@ respone
 */
 export const searchUsers = async (searchWord) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/users`, {
-      params: { searchWord },
+    const response = await axios.post(`${API_BASE_URL}/chat/searchUser`, {
+      query: searchWord
     });
-    return response.data;
+    alert("后端返回用户俩表："+JSON.stringify(response));
+    return response.data.data.userList;
   } catch (error) {
     console.error('Error searching users:', error);
     throw error;
@@ -172,11 +179,29 @@ respone:
 */
 export const login = async (email, password) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/login`, {
+    alert("进入登录");
+    const response = await axios.post(`${API_BASE_URL}/user/login`, {
       Email: email,
       Password: password,
     });
-    return response.data;
+    return response.data.data.userInfo;
+  } catch (error) {
+    console.error('Error logging in:', error);
+    throw error;
+  }
+};
+
+//粉丝数请求
+export const getFansNum = async () => {
+  try {
+    //本地获取userId
+    const userID=JSON.parse(localStorage.getItem("user")).UID;
+    const response = await axios.post(`${API_BASE_URL}/user/fansNum`, {
+      userID
+    });
+    alert("后端粉丝数"+JSON.stringify(response.data.data));
+    return response.data.data;
+    
   } catch (error) {
     console.error('Error logging in:', error);
     throw error;
@@ -207,13 +232,12 @@ respone (响应数据为List,每个List内容如下,List内按照时间先后排
  */
 export const api_ScheduleItems = async (uid) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/schedule`, {
-      params: { Uid: uid },
+    const response = await axios.post(`${API_BASE_URL}/user/schedule`, {
+      userID: uid ,
     });
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error('Error fetching schedule items:', error);
-    alert("api:获取个人信息uid="+uid+"失败");
     throw error;
   }
 };

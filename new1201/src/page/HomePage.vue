@@ -1,5 +1,5 @@
 <template>
-  <TopBar />
+  <GuideBar />
   <div class="mybody">
     <div class="left">
       <CarouselImage :images="images" />
@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import GuideBar from '@/components/GuideBar.vue';
 import ACalendar from '@/components/ACalendar.vue';
 import CarouselImage from '@/components/CarouselImage.vue';
 import SearchBox from '@/components/SearchBox.vue';
@@ -35,7 +36,7 @@ import { fetchHotData,search } from '@/api.js';
 export default {
   name: 'HomePage',
   components: {
-    TopBar,
+    GuideBar,
     ACalendar,
     CarouselImage,
     SearchBox,
@@ -71,7 +72,7 @@ export default {
           }
         });
       } catch (error) {
-        alert("搜索信息失败");
+       // alert("搜索信息失败");
         console.error('搜索请求失败:', error);
       }
     },
@@ -81,7 +82,7 @@ export default {
         this.hotlist = data;
       } catch (error) {
         console.error('获取热门数据失败:', error);
-        alert("获取热门数据失败");
+        //alert("获取热门数据失败");
       }
     }
   }

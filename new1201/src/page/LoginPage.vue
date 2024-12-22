@@ -63,15 +63,8 @@ import { login } from '@/api.js';
                 try {
                     const data=await login(this.email,this.password);
                     if (data) {
-                        alert("前端返回信息"+JSON.stringify(data)+"登录成功！");
                         // 将用户信息存储在本地
                         localStorage.setItem('user', JSON.stringify(data));
-                        localStorage.setItem('userID', data.UID);
-                        alert("存储："+localStorage.getItem('userID'))
-                        alert("传入"+data.UID)
-                        localStorage.setItem('userName', data.UName);
-                        localStorage.setItem('userRemark', data.URemark);
-                        localStorage.setItem('userImage', data.UImage); // 存储用户头像URL
                         this.$router.push("/HomePage"); // 登录成功后跳转到主页
                     } else {
                         this.errorMessage = data.message;
