@@ -19,11 +19,12 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		userRoutes.POST("login", userController.Login)                       // 登录
 		userRoutes.POST("logout", userController.Logout)                     //登出
 		userRoutes.POST("guanzhu", userController.GuanZhu)                   //关注用户
-		userRoutes.GET("fansNum", userController.FansNum)                    //粉丝数量
+		userRoutes.POST("fansNum", userController.FansNum)                   //粉丝数量
 		userRoutes.PATCH("editInfo", userController.EditInfo)                //用户编辑信息
-		userRoutes.GET("info", userController.Info)                          //返回用户信息
+		userRoutes.POST("info", userController.Info)                         //返回用户信息
 		userRoutes.POST("forgot-password", userController.ForgotPassword)    //忘记密码
 		userRoutes.POST("verify-reset-code", userController.VerifyResetCode) //验证验证码
+		userRoutes.POST("schedule", userController.Schedule)                 //推送行程
 	}
 
 	chatController := controller.NewChatController()
@@ -31,7 +32,21 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 	{
 		chatRoutes.POST("searchChatList", chatController.SearchChatList) //返回聊天室匹配结果
 		chatRoutes.POST("searchUser", chatController.SearchUser)         //返回用户匹配结果
+		chatRoutes.POST("createChat", chatController.CreateChat)         //创建聊天室
+		chatRoutes.GET("chatRecords", chatController.ChatRecords)        //返回聊天记录
+
+		chatRoutes.POST("disbandChatRoom", chatController.DisbandChatRoom) // 房主解散群聊
+		chatRoutes.POST("leaveChatRoom", chatController.LeaveChatRoom)     //退出群聊
+		chatRoutes.POST("addMember", chatController.AddMember)             //添加成员到uc_match表中
+		chatRoutes.POST("getSpeakers", chatController.GetSpeakers)         //返回发言成员列表（uc_match信息）
+		chatRoutes.POST("successMatch", chatController.SuccessMatch)       //添加成功匹配成员信息
+
 	}
 
+	fileController := controller.NewFileController()
+	fileRoutes := r.Group("/file")
+	{
+		fileRoutes.POST("uploadAvatar", fileController.UploadAvatar) // 上传头像
+	}
 	return r
 }

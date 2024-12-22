@@ -1,14 +1,14 @@
 <template>
-    <GuideBar />
+    <TopBar />
     <h1>新建房间</h1>
 </template>
 
 <script>
-import GuideBar from '../components/GuideBar.vue';
+import TopBar from '../components/TopBar.vue';
 export default{
     name:'NewRoomPage',
     components:{
-        GuideBar,
+        TopBar,
     }
 }
 </script>
