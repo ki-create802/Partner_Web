@@ -61,7 +61,7 @@
                 }
 
                 try {
-                    const response = await fetch('http://localhost:3000/api/login', {
+                    const response = await fetch('http://localhost:8082/user/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -73,11 +73,19 @@
                     });
 
                     const data = await response.json();
+                    // var jsonData = JSON.parse(response);
+                    // alert("响应："+JSON.stringify(data))
+                    // alert("响应："+response)
 
                     if (response.ok) {
                         alert(data.UID, "登录成功！");
                         // 将用户信息存储在本地
                         localStorage.setItem('user', JSON.stringify(data));
+                        localStorage.setItem('userID', data.UID);
+                        alert("存储："+localStorage.getItem('userID'))
+                        alert("传入"+data.UID)
+                        localStorage.setItem('userName', data.UName);
+                        localStorage.setItem('userRemark', data.URemark);
                         localStorage.setItem('userImage', data.UImage); // 存储用户头像URL
                         this.$router.push("/HomePage"); // 登录成功后跳转到主页
                     } else {

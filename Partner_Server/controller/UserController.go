@@ -103,12 +103,6 @@ func (a UserController) Login(c *gin.Context) {
 		return
 	}
 
-	//var userID uint
-	//userID = user.UID
-	//session := sessions.Default(c) //获取会话
-	//session.Set("userID", userID)  //将用户ID存储在会话中
-	//session.Save()
-
 	if user.UKey != password {
 		common.Fail(c, 422, nil, "密码错误")
 		return
@@ -127,8 +121,18 @@ func (a UserController) Login(c *gin.Context) {
 		return
 	}
 
+	// 返回用户详细信息
+	userInfo := gin.H{
+		"UID":     user.UID,
+		"UName":   user.UName,
+		"UEmail":  user.UEmail,
+		"UImage":  user.UImage,
+		"URemark": user.URemark,
+		"token":   token,
+	}
+
 	// 返回结果
-	common.Success(c, gin.H{"token": token}, "登录成功")
+	common.Success(c, gin.H{"userInfo": userInfo}, "登录成功")
 }
 
 // 关注行为添加到配对表

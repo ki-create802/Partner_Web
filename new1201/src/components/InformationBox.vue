@@ -35,9 +35,9 @@ export default {
   data() {
     return{
       avatarUrl: require("@/assets/avatar.png"), // 默认头像
-      username: '张三',
+      username: localStorage.getItem('userUName')||'张三',
       followersCount: 2000,
-      signature: '这是我的个性签名',
+      signature: localStorage.getItem('userURemark') ||'这是我的个性签名',
     };
   },
   methods: {
@@ -97,6 +97,26 @@ export default {
     //     this.avatarUrl = savedAvatar;
     //   }
     // }
+    // 获取用户信息
+    fetchUserInfo() {
+      axios.get('http://localhost:8082/user/info', {
+        params: {
+          userID: localStorage.getItem('userID') // 假设用户 ID 为 1，实际应从登录状态中获取
+        }
+      })
+          .then(response => {
+            const user = response.data.data.user;
+            this.avatarUrl = user.UImage; // 更新头像
+            this.username = user.UName; // 更新昵称
+            this.signature = user.URemark; // 更新签名
+          })
+          .catch(error => {
+            console.error('获取用户信息失败:', error);
+          });
+    }
+  },
+  mounted() {
+    this.fetchUserInfo(); // 组件挂载时获取用户信息
   }
 }
 </script>
