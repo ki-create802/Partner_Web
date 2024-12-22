@@ -16,81 +16,31 @@
 </template>
 
 <script>
-import axios from 'axios';
 
 export default {
   name: 'ChatList',
+  props: {
+    chats:{
+      type:Array,
+      Required:true
+    }
+  },
   data() {
     return {
       searchWord:'',
-      chats: [],
     };
   },
   methods: {
     async searchChats(){
-      if(this.searchWord.trim()==='')return;
-      try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
-          console.error('User information not found in local storage.');
-          return;
-        }
-        const uid = user.UID;
-        const searchWord=this.searchWord;
-      // 在组件创建时发送请求获取聊天室列表数据
-        axios.get('http://localhost:3000/api/chats', {
-          params: {
-            uid,
-            searchWord,
-          },
-        }).then(response => {
-            this.chats = response.data;
-            this.searchWord='';
-          }).catch(error => {
-            alert("获取聊天列表失败:",error);
-          });
-      }catch{
-        alert("获取聊天列表失败！");
+      if(this.searchWord.trim()=="")return;
+      else {
+        this.$emit('search-chats', this.searchWord);
       }
     },
     async selectChat(chat) {
-      try {
-        // 发送请求获取历史聊天信息
-        const response = await axios.get(`http://localhost:3000/api/getchats/${chat.id}/messages`);
-        const messages = response.data;
-
-        // 将聊天室信息和历史聊天信息一起传递给父组件
-        this.$emit('chat-selected', { chat, messages });
-        } catch (error) {
-        console.error('Error fetching chat messages:', error);
-        alert('获取聊天记录失败！');
-      }
+      //向前端发送点击房间的房间信息
+      this.$emit('chat-selected', chat);
     },
-  },
-  created() {
-    // 从本地存储中获取用户信息
-    try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
-          console.error('User information not found in local storage.');
-          return;
-        }
-        const uid = user.UID;
-
-      // 在组件创建时发送请求获取聊天室列表数据
-      axios.get('http://localhost:3000/api/chats', {
-        params: {
-          uid,
-          searchWord:'',
-        },
-      }).then(response => {
-          this.chats = response.data;
-        }).catch(error => {
-          console.error('Error fetching chat list:', error);
-        });
-    }catch{
-      alert("获取聊天列表失败！");
-    }
   },
 };
 </script>

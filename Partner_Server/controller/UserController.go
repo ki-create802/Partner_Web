@@ -3,9 +3,14 @@ package controller
 import (
 	"Partner_Web/Partner_Server/common"
 	"Partner_Web/Partner_Server/model"
+	"Partner_Web/Partner_Server/pkg/redis"
+	"Partner_Web/Partner_Server/services"
+	"Partner_Web/Partner_Server/utils"
+	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"time"
 	//"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,13 +19,15 @@ type UserController struct {
 }
 
 type InUserController interface {
-	Register(c *gin.Context) //实现注册功能
-	Login(c *gin.Context)    //实现登录功能
-	Logout(c *gin.Context)   //用户登出
-	GuanZhu(c *gin.Context)  //用户关注
-	FansNum(c *gin.Context)  //返回粉丝数
-	EditInfo(c *gin.Context) //用户编辑信息
-	Info(c *gin.Context)     //返回用户信息
+	Register(c *gin.Context)        //实现注册功能
+	Login(c *gin.Context)           //实现登录功能
+	Logout(c *gin.Context)          //用户登出
+	GuanZhu(c *gin.Context)         //用户关注
+	FansNum(c *gin.Context)         //返回粉丝数
+	EditInfo(c *gin.Context)        //用户编辑信息
+	Info(c *gin.Context)            //返回用户信息
+	ForgotPassword(c *gin.Context)  //忘记密码
+	VerifyResetCode(c *gin.Context) //验证验证码
 }
 
 func NewUserController() InUserController {
@@ -31,7 +38,7 @@ func NewUserController() InUserController {
 }
 
 // 注册
-func (a UserController) Register(c *gin.Context) {
+func (a UserController) Register(c *gin.Context) { //未完成
 
 	// 获取context中的参数
 	var requestUser model.User
@@ -69,10 +76,10 @@ func (a UserController) Register(c *gin.Context) {
 	}
 	a.DB.Table("user").Create(&newUser)
 	//***********************************************************
-	//还缺少的功能 分配用户id
+	//还缺少的功能 分配用户id 自增长
 	//密码加密功能
 	//对于用户名要不要不让重复
-	//默认头像图标
+	//默认头像图标11111111111111111111111111111111111111111111
 	//************************************************************
 
 	// 返回成功响应
@@ -88,6 +95,7 @@ func (a UserController) Login(c *gin.Context) {
 	userEmail := requestUser.UEmail
 	password := requestUser.UKey
 
+	//fmt.Println("email:", userEmail, "  password:", password)
 	// 数据验证
 	var user model.User
 	a.DB.Table("user").Where("UEmail=?", userEmail).First(&user)
@@ -151,9 +159,6 @@ func (a UserController) Logout(c *gin.Context) { //用户登出
 
 // 返回粉丝数量  前端传入的数据是用户id 是可以只返回一个Uid的 用全局变量
 func (a UserController) FansNum(c *gin.Context) { //
-	//var requestUser model.User
-	//c.Bind(&requestUser)
-	//userid := requestUser.UID
 
 	session := sessions.Default(c)  //获取会话
 	userid := session.Get("userID") //获取ID
@@ -175,9 +180,12 @@ func (a UserController) FansNum(c *gin.Context) { //
 }
 
 func (a UserController) EditInfo(c *gin.Context) {
-	var requestUser model.User
+
+	session := sessions.Default(c)  //获取会话
+	userid := session.Get("userID") //获取ID
+
+	var requestUser model.User //改什么传什么 用json
 	c.Bind(&requestUser)
-	userid := requestUser.UID //用户id是固定的不允许改动的 这里读取过来是调数据库信息
 	userName := requestUser.UName
 	userEmail := requestUser.UEmail
 	password := requestUser.UKey
@@ -229,4 +237,63 @@ func (a UserController) Info(c *gin.Context) { //返回用户信息
 
 	// 返回成功响应
 	common.Success(c, gin.H{"user": infoOfUser}, "用户信息传递成功")
+}
+
+// ForgotPasswordHandler 处理忘记密码请求
+func (a UserController) ForgotPassword(c *gin.Context) {
+	var Message model.EmailMessage
+	c.Bind(&Message)
+	email := Message.Email
+	// 如果电子邮件地址为空，返回400错误
+	if email == "" {
+		common.Fail(c, 400, gin.H{"error": "Email is required"}, "电子邮件地址为空")
+		return
+	}
+
+	//调用GenerateRandomCode生成随机六位数
+	code := utils.GenerateRandomCode(6)
+	//调用SendVerificationCode函数发送验证码到用户的电子邮件。
+	err := services.SendVerificationCode(email, code)
+	if err != nil {
+		common.Fail(c, 500, gin.H{"error": "Failed to send verification code"}, "服务器错误")
+		return
+	}
+	//初始化redis客户端
+	redisClient := redis.NewRedisClient()
+	err = redisClient.SetCode(email, code, 5*time.Minute) // 设置验证码有效期为5分钟
+	if err != nil {
+		//存储验证码失败
+		common.Fail(c, 500, gin.H{"error": "Failed to store verification code"}, "服务器错误")
+		return
+	}
+	common.Success(c, gin.H{"message": "Verification code sent to your email."}, "成功发送验证码到邮箱")
+}
+
+// VerifyResetCodeHandler 验证重置密码的验证码
+func (a UserController) VerifyResetCode(c *gin.Context) {
+	var message model.EmailMessage
+	c.Bind(&message)
+	email := message.Email
+	code := message.Code
+
+	fmt.Println("email: ", email, " code: ", code)
+
+	redisClient := redis.NewRedisClient()
+	storedCode, err := redisClient.GetCode(email)
+	if err != nil {
+		// 如果从Redis获取验证码失败，返回500错误
+		common.Fail(c, 500, gin.H{"error": "Failed to retrieve verification code"}, "获取验证码失败")
+		return
+	}
+
+	if storedCode != code {
+		//fmt.Println("fail!------", storedCode, " : ", code)
+		//验证码不匹配
+		common.Fail(c, 400, gin.H{"error": "Invalid verification code"}, "验证码错误")
+		return
+	} else {
+		// 如果验证码匹配，返回成功消息
+		//fmt.Println("success!------", storedCode, " : ", code)
+		common.Success(c, gin.H{"message": "Verification successful. You can reset your password now."}, "验证码匹配成功")
+	}
 }

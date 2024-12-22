@@ -1,15 +1,13 @@
+<!-- 聊天室界面 组件-->
 <template>
   <div class="chat-area">
     <div class="part1">
       <h2>{{ selectedChat.name }}</h2>
       <div class="roomInfo">
         <div class="left">
-          <div class="memberAvatar">
-            <img class="avatar" v-for="(avatar, index) in avatars" :key="index" :src="'http://localhost:3000/' + avatar">
-          </div>
         </div>
         <div class="right">
-          <button class="PopupWindowButton" @click="showPopup('PopupWindow')"></button>
+          <button class="addMemberButton" @click="showPopup('addMember')" ></button>
           <button class="setButton" @click="showPopup('settings')"></button>
           <button class="memberButton" @click="showPopup('members')"></button>
         </div>
@@ -25,13 +23,19 @@
 
     <!-- 弹出窗口 -->
     <PopupWindow v-if="isPopupVisible" @close="closePopup">
-      <div v-if="popupType === 'PopupWindow'">
+      <div v-if="popupType === 'addMember'">
         <h3>添加成员</h3>
         <!-- 添加成员的表单或内容 -->
         <div class="mylist">
         <ul>
-          <li v-for="i in range(5)" :key="i" >
-            列表第{{ i }}项
+          <li v-for="chatmember in chatMembers" :key='chatmember.id' >
+            <div class="addMemberList">
+              <div class="addmemberInfo">
+                <img class="avatar" :src="'http://localhost:3000/' + chatmember.avatar">
+                成员名{{ chatmember.name }}
+              </div>
+              <button @click="addMember(chatmember.id)">添加</button>
+            </div>
           </li>
         </ul>
       </div>
@@ -46,9 +50,22 @@
           <button @click="dissolveRoom">解散房间</button>
          </div>
       </div>
+
+
       <div v-else-if="popupType === 'members'">
         <h3>成员列表</h3>
         <!-- 成员列表的表单或内容 -->
+        <ul>
+          <li v-for="roomMember in roomMembers" :key='roomMember.id' >
+            <div class="roomMemberList">
+              <div class="roomMemberInfo">
+                <img class="avatar" :src="'http://localhost:3000/' + roomMember.avatar">
+                成员名{{ roomMember.name }}
+              </div>
+              <button @click="removeMember(roomMember.id)">删除</button>
+            </div>
+          </li>
+        </ul>
       </div>
     </PopupWindow>
   </div>
@@ -75,18 +92,17 @@ export default {
     isSecret:{
       type:Boolean,
       required:true,
+    },
+    //会话成员列表每一项为{userid,avatar}
+    chatMembers:{
+      type: Array,
+    },
+    roomMembers:{
+      type: Array,
     }
   },
   data() {
     return {
-      avatars: [
-        'images/avatar1.png',
-        'images/avatar2.png',
-        'images/avatar1.png',
-        'images/avatar2.png',
-        'images/avatar1.png',
-        'images/avatar2.png',
-      ],
       newMessage: '',
       uid: null,
       isPopupVisible: false,
@@ -94,35 +110,26 @@ export default {
     };
   },
   methods: {
+    removeMember(id){
+      this.$emit('remove-member',id)
+    },
+    getRoomMember(){
+      this.$emit('get-room-member');
+    },
+    addMember(id){
+      this.$emit('add-member',id);
+    },
+    getchatMember(){
+      this.$emit('get-chat-member');
+    },
     setSecret(){
-      if(confirm("你确定将房间设置为私密吗？ps：私密后只有搭子才能看见以及进入房间。")){
-        const roomStatus={
-          isSecret:true,
-          isdissolved:false
-        };
-        this.$emit('room-status-changed', roomStatus);
-        alert("设置成功！");
-      }
+      this.$emit('set-secrect');
     },
     setPublic(){
-      if(confirm("你确定将房间设置为公开吗？ps：公开后所有人都能发现你的房间。")){
-        const roomStatus={
-          isSecret:false,
-          isdissolved:false
-        };
-        this.$emit('room-status-changed', roomStatus);
-        alert("设置成功！");
-      }
+      this.$emit('set-public');
     },
     dissolveRoom(){
-      if(confirm("你确定解散房间吗？")){
-        const roomStatus={
-          isSecret:true,
-          isdissolved:true
-        };
-        this.$emit('room-status-changed', roomStatus);
-        alert("解散房间成功！");
-      }
+      this.$emit('set-dissolve');
     },
     range(n) {//一个无用函数，用于调试
       return Array.from({ length: n }, (_, i) => i + 1);
@@ -135,6 +142,8 @@ export default {
     showPopup(type) {
       this.popupType = type;
       this.isPopupVisible = true;
+      if(type=="addMember") this.getchatMember();
+      if(type=="members")this.getRoomMember();
     },
     closePopup() {
       this.isPopupVisible = false;
@@ -185,7 +194,7 @@ export default {
   background-image: url('@/assets/齿轮.jpg');
   background-size: cover;
 }
-.right .PopupWindowButton {
+.right .addMemberButton {
   background-image: url('@/assets/加号.jpg');
   background-size: cover;
 }

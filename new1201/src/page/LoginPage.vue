@@ -42,6 +42,7 @@
 </template>
   
 <script>
+import { login } from '@/api.js';
     export default {
         name: "LoginPage",
         data() {
@@ -59,23 +60,10 @@
                     this.errorMessage = "账号或密码不能为空！";
                     return;
                 }
-
                 try {
-                    const response = await fetch('http://localhost:3000/api/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            Email: this.email,
-                            Password: this.password
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        alert(data.UID, "登录成功！");
+                    const data=await login(this.email,this.password);
+                    if (data) {
+                        alert("前端返回信息"+JSON.stringify(data)+"登录成功！");
                         // 将用户信息存储在本地
                         localStorage.setItem('user', JSON.stringify(data));
                         localStorage.setItem('userImage', data.UImage); // 存储用户头像URL

@@ -31,7 +31,7 @@ import ACalendar from '@/components/ACalendar.vue';
 import CarouselImage from '@/components/CarouselImage.vue';
 import SearchBox from '@/components/SearchBox.vue';
 import FindListItem from '@/components/FindListItem.vue';
-import axios from 'axios';
+import { fetchHotData,search } from '@/api.js';
 
 export default {
   name: 'HomePage',
@@ -56,22 +56,19 @@ export default {
     };
   },
   created() {
-    this.fetchHotData(); // 在组件创建时获取热门数据
+    this.fetchHotData_(); // 在组件创建时获取热门数据
   },
   methods: {
     async handleSearch(searchParams) {
       try {
         const { query, scope } = searchParams;
-        // 向后端发送搜索请求
-        const response = await axios.get(`http://localhost:3000/api/search?Searchword=${query}&Range=${scope}`);
-        const searchResults = response.data;
-        // 导航到 FindPage 并传递搜索内容和结果
+        const searchResults = await search(query, scope);
         this.$router.push({
           name: 'FindPage',
           query: {
             q: query,
             scope: scope,
-            results: JSON.stringify(searchResults) // 将搜索结果编码为 JSON 字符串
+            results: JSON.stringify(searchResults)
           }
         });
       } catch (error) {
@@ -79,13 +76,13 @@ export default {
         console.error('搜索请求失败:', error);
       }
     },
-    async fetchHotData() {
+    async fetchHotData_() {
       try {
-        // 向后端发送请求获取热门数据
-        const response = await axios.get('http://localhost:3000/api/hot');
-        this.hotlist = response.data;
+        const data = await fetchHotData();
+        this.hotlist = data;
       } catch (error) {
         console.error('获取热门数据失败:', error);
+        alert("获取热门数据失败");
       }
     }
   }
