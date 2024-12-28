@@ -2,7 +2,7 @@
     <div class="top-rectangle"></div>
     <div class="topbar">
         <div class="logo">
-            <img src="../assets/logo.jpg" alt="Logo" class="logo">
+            <img src="../assets/logo.png" alt="Logo" class="logo">
         </div>
         <div class="navbar">
             <ul class="nav-items">
@@ -80,15 +80,15 @@ export default defineComponent({
 .top-rectangle {
     /* position: fixed; */
     top: 0;
-    height: 50px;
+    height: 110px;
     width: 100%;
-    background: -webkit-linear-gradient(top, hsla(207, 63%, 70%, 0.37), rgba(255, 255, 255,0)) no-repeat;
+    background: -webkit-linear-gradient(top, hsla(207, 75%, 58%, 0.5), rgba(255, 255, 255,0)) no-repeat;
     z-index: 998;
     /* 确保长方形位于其他内容之上 */
 }
 .topbar {
     /* position: fixed; */
-    top: -20px;
+    top: -85px;
     height: 90px;
     width: 80%;
     position: relative; 
@@ -101,8 +101,8 @@ export default defineComponent({
     justify-content: space-between;
 }
 .logo {
-    width: 180px;
-    margin-left: 10px;
+    width: 80px;
+    margin-left: 20px;
     margin-right: 20px;
 }
 .navbar{
