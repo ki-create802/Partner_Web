@@ -5,6 +5,8 @@
     <div class="user-info">
         <InformationBox />
     </div>
+    <!-- 添加背景图层 -->
+    <div class="background-layer"></div>
     <div class="more-info">
         <div class="achievement">
             <div class="medal1">
@@ -59,19 +61,34 @@ export default {
 </script>
 
 <style scoped>
+.background-layer {
+    position: absolute;     /* 使用绝对定位 */
+    top: 130px;                 /* 定位到顶部 */
+    left: 0;                /* 从左边开始 */
+    width: 100vw;           /* 占满全屏宽度 */
+    height: 38%;           
+    background-image: url('../assets/person_background.jpg');  
+    background-size: cover;  /* 背景图自动适应尺寸 */
+    background-position: center center;  /* 背景图居中 */
+    background-repeat: no-repeat;  /* 不重复背景图 */
+    z-index: -1;             /* 确保背景图位于所有内容的下方 */
+}
 .more-info {
+    /* position: absolute; */
     display: flex;
-    gap: 20px;
+    gap: 30px;
+    background-color: #f1f2f3;
+    width: 100vw;
 }
 .user-info {
-    margin-top: 0;
+    margin-top: 90px;
 }
 .achievement {
-    height: 500px;
-    width: 250px;
-    background: #ccc;
+    height: 700px;
+    width: 320px;
+    background: white;
     margin-top: 15px;
-    margin-left: 8px;
+    margin-left: 50px;
 }
 .medal1 {
     margin-left: 15px;
@@ -83,18 +100,18 @@ export default {
 .tabWidget {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     padding: 15px;
-    margin-left: 10px;
+    margin-left: 35px;
 }
 .tabs {
     display: flex;
 }
 .tabs button {
-    padding: 2px 5px;
-    margin: 0 5px;
-    font-size: 13px;
+    padding: 5px 8px;
+    margin: 2px 5px;
+    font-size: 16px;
     cursor: pointer;
     border: none;
-    background-color: #f4f4f4;
+    background-color: white;
     transition: background-color 0.3s;
 }
 .tabs button.active {
@@ -104,7 +121,8 @@ export default {
 .tab-content {
     width: 1300px;
     height: 650px;
-    border: 1.5px solid #000000;
+    border: 1px solid #f1f2f3;
+    background-color: white;
 }
 .wait-content {
     padding: 10px;
