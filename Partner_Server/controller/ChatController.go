@@ -17,10 +17,12 @@ type ChatController struct {
 }
 
 type InChatController interface {
-	SearchChatList(c *gin.Context) //搜索返回匹配聊天室
-	SearchUser(c *gin.Context)     //搜索返回匹配用户
-	CreateChat(c *gin.Context)     //创建聊天室
-	ChatRecords(c *gin.Context)    //返回聊天记录
+	SearchChatList(c *gin.Context)  //搜索返回匹配聊天室
+	SearchUser(c *gin.Context)      //搜索返回匹配用户
+	CreateChat(c *gin.Context)      //创建聊天室
+	ChatLists(c *gin.Context)       //返回聊天室聊天列表
+	ChatRecords(c *gin.Context)     //返回聊天室对应聊天记录
+	SaveChatRecords(c *gin.Context) //存储聊天记录
 
 	DisbandChatRoom(c *gin.Context) //房主解散群聊
 	LeaveChatRoom(c *gin.Context)   //退出群聊
@@ -402,6 +404,208 @@ func (b ChatController) SuccessMatch(c *gin.Context) { //添加成功匹配表
 	common.Success(c, nil, "成员添加成功")
 }
 
-func (b ChatController) ChatRecords(c *gin.Context) {
+func (b ChatController) ChatLists(c *gin.Context) {
+	var request struct {
+		UID        uint   `json:"userID"`
+		SearchWord string `json:"searchWord"`
+	}
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+	// fmt.Println("UID:", request.UID)
 
+	var cids []uint
+	if err := b.DB.Table("uc_match").
+		Where("uid = ?", request.UID).
+		Pluck("cid", &cids).Error; err != nil {
+		common.Fail(c, 500, nil, "查询失败")
+		return
+	}
+
+	// fmt.Println("cids", cids)
+
+	if len(cids) == 0 {
+		common.Success(c, nil, "未找到聊天室记录")
+		return
+	}
+
+	type ChatInfo struct {
+		CID   uint   `gorm:"column:cid"`
+		CName string `gorm:"column:cname"`
+		UID   uint   `gorm:"column:uid"`
+	}
+	// 从 chat_info 表中找到 cid 在 cids 列表中的行
+	var chatInfos []ChatInfo
+	result := b.DB.Table("chatinfo").
+		Where("cstate =?", 1).
+		Where("cid IN (?)", cids).
+		Find(&chatInfos)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "查询 chatinfo 表失败")
+		return
+	}
+
+	fmt.Println("chatInfos", chatInfos)
+
+	type Response struct {
+		CID    uint   `json:"id"`
+		CName  string `json:"name"`
+		UImage string `json:"ownerImage"`
+	}
+	// 对于每个 chatInfo，从 user 表中找到 uimage
+	var responses []Response
+	for _, chatInfo := range chatInfos {
+		var User struct {
+			UID    uint   `gorm:"column:uid"`
+			UImage string `gorm:"column:uimage"`
+		}
+		result := b.DB.Table("user").
+			Where("uid = ?", chatInfo.UID).
+			First(&User)
+		if result.Error != nil {
+			common.Fail(c, 500, nil, "查询 user 表失败")
+			return
+		}
+
+		// 构造返回数据
+		responses = append(responses, Response{
+			CID:    chatInfo.CID,
+			CName:  chatInfo.CName,
+			UImage: User.UImage,
+		})
+	}
+	// fmt.Println("responses", responses)
+
+	// 返回结果
+	common.Success(c, gin.H{"chatList": responses}, "查询成功")
+
+}
+
+func (b ChatController) ChatRecords(c *gin.Context) {
+	var request struct {
+		CID     int `json:"cid"`
+		LastRID int `json:"last_rid"`
+	}
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+	// fmt.Println("cid", request.CID)
+	// fmt.Println("Rid", request.LastRID)
+
+	// 查询 record 表中 cid 等于 request.CID 的最大 ridPerChat
+	var maxRIDPerChat struct {
+		MAXNum int `gorm:"column:max_rid"`
+	}
+	if err := b.DB.Debug().Table("record").
+		Select("MAX(ridPerChat) AS max_rid").
+		Where("cid = ?", request.CID).
+		First(&maxRIDPerChat).Error; err != nil {
+		common.Fail(c, 500, nil, "查询最大 ridPerChat 失败")
+		return
+	}
+
+	// fmt.Println("maxRIDPerChat1:", maxRIDPerChat.MAXNum)
+
+	// 如果查询到的 MAXNum 为 0，表示没有聊天记录
+	if maxRIDPerChat.MAXNum == 0 {
+		common.Success(c, nil, "暂无聊天记录")
+		return
+	}
+
+	// fmt.Println("maxRIDPerChat2:", maxRIDPerChat.MAXNum)
+
+	//如果 maxRIDPerChat > request.LastRID，查询新增的记录
+	if maxRIDPerChat.MAXNum > request.LastRID {
+		var newRecords []model.Record
+		if err := b.DB.Debug().Table("record").
+			Where("cid = ? AND ridPerChat > ?", request.CID, request.LastRID).
+			Find(&newRecords).Error; err != nil {
+			common.Fail(c, 500, nil, "查询新增记录失败")
+			return
+		}
+
+		// 构造返回数据
+		var responses []gin.H
+		for _, record := range newRecords {
+			var user struct {
+				UName  string `gorm:"column:uname"`
+				UImage string `gorm:"column:uimage"`
+			}
+			if err := b.DB.Debug().Table("user").
+				Select("uname, uimage").
+				Where("uid = ?", record.UID).
+				First(&user).Error; err != nil {
+				common.Fail(c, 500, nil, "查询用户信息失败")
+				return
+			}
+
+			// 构造返回数据
+			responses = append(responses, gin.H{
+				"RIDPerChat": record.RIDPerChat,
+				"CID":        record.CID,
+				"UID":        record.UID,
+				"RType":      record.RType,
+				"RContent":   record.RContent,
+				"RTime":      record.RTime,
+				"UName":      user.UName,  // 添加用户名
+				"UImage":     user.UImage, // 添加用户头像
+			})
+		}
+
+		// 4. 返回结果
+		common.Success(c, gin.H{"chatRecords": responses}, "查询成功")
+	} else {
+		// 如果没有新增记录，返回空数组
+		common.Success(c, nil, "没有新增记录")
+	}
+
+}
+
+func (b ChatController) SaveChatRecords(c *gin.Context) { //存储聊天记录
+
+	type NewMessageData struct {
+		ID       uint   `json:"id"`
+		Text     string `json:"text"`
+		SenderID uint   `json:"senderId"`
+		IsImage  bool   `json:"isImage"`
+	}
+
+	var req struct {
+		RoomID     uint           `json:"roomid"`
+		NewMessage NewMessageData `json:"newmessage"`
+	}
+	if err := c.Bind(&req); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	// 2. 将 isImage 转换为 rtype
+	var rtype int
+	if req.NewMessage.IsImage {
+		rtype = 0 // 图片
+	} else {
+		rtype = 1 // 文字
+	}
+
+	rtime := time.Now()
+
+	// 3. 将数据插入到数据库的 record 表中
+	record := model.Record{
+		CID:        req.RoomID,
+		RIDPerChat: req.NewMessage.ID,
+		RContent:   req.NewMessage.Text,
+		UID:        req.NewMessage.SenderID,
+		RType:      rtype,
+		RTime:      rtime,
+	}
+
+	result := b.DB.Create(&record)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "插入新聊天记录失败")
+		return
+	}
+
+	common.Success(c, gin.H{"record": record}, "成功插入聊天室记录")
 }

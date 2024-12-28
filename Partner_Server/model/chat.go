@@ -43,3 +43,12 @@ type UcMatch struct {
 	CID uint `gorm:"column:cid;not null;primaryKey"`
 	UID uint `gorm:"column:uid;not null;primaryKey"`
 }
+
+type Record struct {
+	RIDPerChat uint      `gorm:"column:ridPerChat" json:"id"`
+	CID        uint      `gorm:"column:cid"`
+	UID        uint      `gorm:"column:uid" json:"senderId"`
+	RType      int       `gorm:"column:rtype" json:"isImage"`
+	RContent   string    `gorm:"column:rcontent" json:"text"`
+	RTime      time.Time `gorm:"column:rtime"`
+}

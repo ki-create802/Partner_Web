@@ -30,10 +30,12 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 	chatController := controller.NewChatController()
 	chatRoutes := r.Group("/chat")
 	{
-		chatRoutes.POST("searchChatList", chatController.SearchChatList) //返回聊天室匹配结果
-		chatRoutes.POST("searchUser", chatController.SearchUser)         //返回用户匹配结果
-		chatRoutes.POST("createChat", chatController.CreateChat)         //创建聊天室
-		chatRoutes.GET("chatRecords", chatController.ChatRecords)        //返回聊天记录
+		chatRoutes.POST("searchChatList", chatController.SearchChatList)   //返回聊天室匹配结果
+		chatRoutes.POST("searchUser", chatController.SearchUser)           //返回用户匹配结果
+		chatRoutes.POST("createChat", chatController.CreateChat)           //创建聊天室
+		chatRoutes.POST("chatLists", chatController.ChatLists)             //返回聊天室界面的聊天室列表
+		chatRoutes.POST("chatRecords", chatController.ChatRecords)         //返回聊天室id对应聊天记录
+		chatRoutes.POST("saveChatRecords", chatController.SaveChatRecords) //保存前端聊天记录
 
 		chatRoutes.POST("disbandChatRoom", chatController.DisbandChatRoom) // 房主解散群聊
 		chatRoutes.POST("leaveChatRoom", chatController.LeaveChatRoom)     //退出群聊

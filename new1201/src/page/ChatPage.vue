@@ -31,6 +31,7 @@ import ChatList from '../components/ChatList.vue';
 import ChatArea from '../components/ChatArea.vue';
 import GuideBar from '../components/GuideBar.vue';
 import axios from 'axios';
+import {getChatsList,getChatMessages} from '../api';
 
 export default {
 name: 'ChatPage',
@@ -67,7 +68,7 @@ created() {
       this.username = user.UName;
     }
     this.userImg = localStorage.getItem('userImage');
-    this.getChatsList(""); //获取聊天列表
+    this.getChatsList_(""); //获取聊天列表
   } catch {
     alert("获取本地个人信息失败");
   }
@@ -126,19 +127,11 @@ methods: {
     }
   },
   //获取聊天列表
-  async getChatsList(searchWord) {
+  async getChatsList_(searchWord) {
     try {
-      axios.get('http://localhost:3000/api/chats', {
-        params: {
-          uid: this.uid,
-          searchWord: searchWord,
-        },
-      }).then(response => {
-        this.chats = response.data;
-      }).catch(error => {
-        console.error('Error fetching chat list:', error);
-        alert("聊天列表获取失败");
-      });
+      const data=await getChatsList(this.uid,searchWord);
+      alert(JSON.stringify(data));
+      this.chats=data;
     } catch {
       alert("聊天列表获取失败");
     }
@@ -192,10 +185,9 @@ methods: {
     this.stopPolling() ;
     this.selectedChat = chatInfo;
     try {
-      // 发送请求获取历史聊天信息
-      const response = await axios.get(`http://localhost:3000/api/pollchats/${chatInfo.id}/messages`);
-      this.messages = response.data;
-
+      // 获取历史聊天信息
+      const data=await getChatMessages(chatInfo.id,0);
+      this.messages=data;
       // 开启长轮询
       this.startPolling();
     } catch (error) {
@@ -228,30 +220,24 @@ methods: {
     });
   },
   // 开启长轮询
-  startPolling() {
+    startPolling() {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
 
     this.pollingInterval = setInterval(async () => {
       try {
-        const lastMessageId = this.messages.length > 0 ? this.messages[this.messages.length - 1].id : 0;
-        const response = await axios.get(`http://localhost:3000/api/pollchats/${this.selectedChat.id}/messages`, {
-          params: {
-            lastMessageId: lastMessageId
-          }
-        });
-
-        if (response.data.length > 0) {
-          this.messages.push(...response.data);
+        const lastMessageId = this.messages.length;
+        const data=await getChatMessages(this.selectedChat.id,lastMessageId);
+        if (data.length > 0) {
+          this.messages.push(...data);
           //对列表消息进行去重
           this.messages = this.messages.filter((item, index, self) => self.findIndex(t => t.id === item.id) === index);
-
         }
       } catch (error) {
         console.error('Error polling for new messages:', error);
       }
-    }, 1000); // 每2秒轮询一次 //间隔越短越错？
+    }, 1000); // 每1秒轮询一次 
   },
   // 停止长轮询
   stopPolling() {

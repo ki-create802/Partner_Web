@@ -2,29 +2,41 @@
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8082';
+// const test_URL = 'http://localhost:3000';
 
 // 获取聊天列表
 /*
 */
-export const getChatsList = async (uid, searchWord) => {
+export const getChatsList = async (userID, searchWord) => {
+  alert("uid,search="+JSON.stringify(userID)+JSON.stringify(searchWord));
   try {
-    const response = await axios.post(`${API_BASE_URL}/chats`, {
-      uid,
+    const response = await axios.post(`${API_BASE_URL}/chat/chatLists`, {
+      userID,
       searchWord,
     });
-    return response.data;
+    // const response = await axios.get(`${test_URL}/api/chats`, {
+    //   uid,
+    //   searchWord,
+    // });
+    alert("response.data.data:"+JSON.stringify(response.data.data));
+    return response.data.data.chatList;
   } catch (error) {
-    console.error('Error fetching chat list:', error);
+    alert('Error fetching chat list:'+error);
     throw error;
   }
 };
 
 // 获取聊天记录
-export const getChatMessages = async (roomId) => {
+export const getChatMessages = async (roomId,lastMessageId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/pollchats/${roomId}/messages`);
-    return response.data;
+    const response = await axios.post(`${API_BASE_URL}/chat/chatRecords`, {
+      cid : roomId,
+      last_rid : lastMessageId,
+    });
+    //alert("response.data.data.chatRecords:"+JSON.stringify(response.data.data.chatRecords));
+    return response.data.data.chatRecords;
   } catch (error) {
+    //alert("error"+error);
     console.error('Error fetching chat messages:', error);
     throw error;
   }
@@ -200,7 +212,7 @@ export const getFansNum = async () => {
       userID
     });
     alert("后端粉丝数"+JSON.stringify(response.data.data));
-    return response.data.data;
+    return response.data.data.fansNum;
     
   } catch (error) {
     console.error('Error logging in:', error);
