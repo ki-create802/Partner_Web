@@ -1,7 +1,5 @@
 <template>
-    <div class="topbar">
-        <TopBar />
-    </div>
+    <GuideBar />
     <div class = "createroom-container">
         <form @submit.prevent="handleSubmit">
             <div class="form-group">
@@ -50,7 +48,7 @@
                     v-model="selectedDate"
                     type="date"
                     placeholder="请选择日期"
-                    format="yyyy-MM-dd"
+                    format="YYYY-MM-DD"
                     :clearable="true"
                     :editable="true"
                 />
@@ -75,12 +73,12 @@
 </template>
 
 <script>
-import TopBar from '../components/TopBar.vue';
+import GuideBar from '../components/GuideBar.vue';
 import { ElDatePicker } from "element-plus";
 export default{
     name:'NewRoomPage',
     components:{
-        TopBar,
+        GuideBar,
         ElDatePicker,
     },
     data(){
