@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8082';
-// const test_URL = 'http://localhost:3000';
+//const test_URL = 'http://localhost:3000/api';
 
 // 获取聊天列表
 /*
@@ -141,12 +141,19 @@ response (和热门数据返回内容的格式相同是个List)
 export const search = async (query, scope) => {
   if(!query)query="";
   try {
-    const response = await axios.post(`${API_BASE_URL}/chat/searchChatList`, {
+    const response = await axios.get(`${API_BASE_URL}/search`, {
+      /*
       query, 
       range: scope
+      */
+      Searchword:query,
+      Range:scope
     });
+    /*真后端
     if(response.data.data==null)return [];
     else return response.data.data.searchResults;
+    */
+   return response.data;
   } catch (error) {
     alert('搜索错误:'+error);
     throw error;
@@ -191,14 +198,15 @@ respone:
 */
 export const login = async (email, password) => {
   try {
-    alert("进入登录");
-    const response = await axios.post(`${API_BASE_URL}/user/login`, {
+    alert("进入登录,输入为"+JSON.stringify(email)+" "+JSON.stringify(password));
+    const response = await axios.post('http://localhost:3000/api/login', {
       Email: email,
       Password: password,
     });
-    return response.data.data.userInfo;
+    // 真后端：return response.data.data.userInfo;
+    return response.data;
   } catch (error) {
-    console.error('Error logging in:', error);
+    alert("ERROR:"+error);
     throw error;
   }
 };

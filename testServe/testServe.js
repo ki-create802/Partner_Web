@@ -17,6 +17,7 @@ const users = [
 
 // 登录接口
 app.post('/api/login', (req, res) => {
+  console.log("登录请求");
     const { Email, Password } = req.body;
 
     // 简单的验证逻辑
@@ -47,9 +48,9 @@ const searchResults = [
 ];
 // 搜索接口
 app.get('/api/search', (req, res) => {
-    const { Searchword,Range } = req.query;
-    console.log("接受搜索信息为：Searchword:",Searchword);
-    console.log("接受搜索信息为：Range:",Range);
+    // const { Searchword,Range } = req.query;
+    // console.log("接受搜索信息为：Searchword:",Searchword);
+    // console.log("接受搜索信息为：Range:",Range);
     // 简单的搜索逻辑
     res.status(200).json(searchResults);
 });

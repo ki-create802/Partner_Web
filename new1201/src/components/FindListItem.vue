@@ -43,11 +43,14 @@ export default {
 
 <style scoped>
 .totalcontainer {
-    height: 100px;
-    background-color: #ffffff48;
-    border-radius: 16px;
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  height: 100px;
+  background-color: #ffffff48; /* 默认背景色 */
+  border-radius: 16px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-image: url('@/assets/hotItemBackground.png'); /* 使用图片作为背景 */
+  background-size: cover; /* 背景图片覆盖整个容器 */
+  background-position: center; /* 背景图片居中 */
 }
 
 .body {

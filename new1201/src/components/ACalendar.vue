@@ -1,11 +1,10 @@
 <!-- src/components/ACalendar.vue -->
 <template>
   <div class="calendar">
-    <h1>我的行程</h1>
     <div class="header">
-      <button @click="prevMonth">&lt;</button>
-      <span>{{ currentMonthName }} {{ currentYear }}</span>
-      <button @click="nextMonth">&gt;</button>
+      <button @click="prevMonth" class="prevbtn"></button>
+      <span class="monthyear">{{ currentMonthName }} {{ currentYear }} </span>
+      <button @click="nextMonth" class="nextbtn"></button>
     </div>
     <div class="days">
       <div v-for="day in daysOfWeek" :key="day" class="day-name">{{ day }}</div>
@@ -15,13 +14,14 @@
         <button @click="selectDate(date.date)">{{ date.date }}</button>
       </div>
     </div>
-    <ScheduleList :scheduleItems="scheduleItems" />
+    <ScheduleList :scheduleItems="scheduleItems" class="list"/>
   </div>
 </template>
 
 <script>
 import ScheduleList from './ScheduleList.vue';
-import { api_ScheduleItems } from '@/api.js';
+import axios from 'axios';
+
 export default {
   name: 'ACalendar',
   components: {
@@ -32,9 +32,7 @@ export default {
       currentDate: new Date(),
       selectedDate: null,
       daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      scheduleItems: [
-        { date: '10.01', content: '默认行程' },
-      ]
+      scheduleItems: [],
     };
   },
   computed: {
@@ -69,20 +67,28 @@ export default {
     this.fetchScheduleItems();
   },
   methods: {
+    
     //获取个人日程信息  
     async fetchScheduleItems() {
       // 从本地存储中获取用户信息
       try {
-        const user = JSON.parse(localStorage.getItem('user')) ;
-        if (user==null) {
-          alert("无法获取本地用户信息");
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+          console.error('User information not found in local storage.');
           return;
         }
+        const uid = user.UID;
       //向后端发送请求个人日程请求
-        const data=await api_ScheduleItems(user.UID);
-        this.scheduleItems=data.ScheduleList;
+      
+        const response = await axios.get('http://localhost:3000/api/schedule', 
+        {
+          params:{
+            Uid: uid,
+          },
+        });
+        this.scheduleItems = response.data;
+        this.$emit('update-schedule-items', this.scheduleItems);
       } catch (error) {
-        alert("获取个人行程失败");
         console.error('There was an error fetching the schedule items!', error);
       }
     },
@@ -118,43 +124,46 @@ export default {
 
 <style scoped>
 .calendar {
-  background-color: rgb(221, 250, 255);
   width: 300px;
-  border: 5px solid #a0f1ff;
-  border-radius: 20px;
-  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 阴影效果 */
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  margin-top:20px;
+  margin-left:20px;
+  margin-right:20px;
 }
-.header button{
-  background-color: #ffffff;
-  border:none;
-}
+
 .days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   margin-bottom: 10px;
-  font-size: 24px;
-  color: rgb(0, 117, 184);
 }
 
 .day-name {
   text-align: center;
+  color: darkgreen; /* 墨绿色 */
+  font-size: 1.2em; /* 较大 */
+  font-weight:900;
 }
 
 .dates {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
+  gap: 5px;
 }
 
 .date {
   text-align: center;
+  
 }
 
 .date button {
@@ -163,18 +172,53 @@ export default {
   border: none;
   background-color: transparent;
   cursor: pointer;
-  font-size: 20px;
+  border-radius: 10px;
+  color: rgb(0, 0, 0); /* 墨绿色 */
+  font-size: 1em; /* 较大 */
+  font-weight:900;
 }
 
 .date.selected button {
   background-color: #007bff;
   color: white;
-  border-radius: 4px;
+  border-radius: 10px;
 }
 
 .date.today button {
   background-color: #ffc107;
   color: white;
-  border-radius: 40%;
+  border-radius: 10px;
 }
+
+.list{
+  margin-left:10px;
+  margin-right: 10px;
+}
+
+.monthyear{
+  color: darkgreen; /* 墨绿色 */
+  font-size: 1.5em; /* 较大 */
+  font-weight:900;
+}
+
+.prevbtn{
+  width: 40px; /* 按钮宽度 */
+  height: 40px; /* 按钮高度 */
+  border: none; /* 移除边框 */
+  background-color: transparent; /* 透明背景 */
+  background-size: cover; /* 背景图片覆盖按钮 */
+  cursor: pointer; /* 鼠标指针为手型 */
+  background-image: url('@/assets/prev-icon.jpg'); /* 设置背景图片 */
+}
+
+.nextbtn{
+  width: 40px; /* 按钮宽度 */
+  height: 40px; /* 按钮高度 */
+  border: none; /* 移除边框 */
+  background-color: transparent; /* 透明背景 */
+  background-size: cover; /* 背景图片覆盖按钮 */
+  cursor: pointer; /* 鼠标指针为手型 */
+  background-image: url('@/assets/next-icon.jpg'); /* 设置背景图片 */
+}
+
 </style>
