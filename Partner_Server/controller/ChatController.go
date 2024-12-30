@@ -601,7 +601,7 @@ func (b ChatController) SaveChatRecords(c *gin.Context) { //存储聊天记录
 		RTime:      rtime,
 	}
 
-	result := b.DB.Create(&record)
+	result := b.DB.Table("record").Create(&record)
 	if result.Error != nil {
 		common.Fail(c, 500, nil, "插入新聊天记录失败")
 		return
