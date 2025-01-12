@@ -77,6 +77,7 @@
   <script>
   import { checkCode } from '@/api';
   import {forgetPW} from '../api';
+  import {resetPW} from '../api';
   export default {
     name: "ForgotPWPage",
     data() {
@@ -136,12 +137,16 @@
           alert("验证码错误");
         }
       },
-      resetPassword() {
+      async resetPassword() {
         if (this.newPassword === this.confirmPassword) {
-          alert("Password reset successful!");
-          this.showResetPasswordModal = false; // 关闭弹窗
+          let ok=false;
+          ok=await resetPW(this.email,this.newPassword);
+          if(ok){
+            alert("密码重置成功");
+            this.showResetPasswordModal = false; 
+          }
         } else {
-          alert("Passwords do not match.");
+          alert("两次输入的密码不一样。");
         }
       },
     },
