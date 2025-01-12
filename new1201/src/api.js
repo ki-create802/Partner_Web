@@ -139,26 +139,20 @@ response (和热门数据返回内容的格式相同是个List)
         memberId,memberId...
 */
 export const search = async (query, scope) => {
-  if(!query)query="";
-  try {
-    const response = await axios.get(`${API_BASE_URL}/search`, {
-      /*
-      query, 
-      range: scope
-      */
-      Searchword:query,
-      Range:scope
-    });
-    /*真后端
-    if(response.data.data==null)return [];
-    else return response.data.data.searchResults;
-    */
-   return response.data;
-  } catch (error) {
-    alert('搜索错误:'+error);
-    throw error;
-  }
-};
+    if(!query)query="";
+    try {
+      const response = await axios.post(`${API_BASE_URL}/chat/searchChatList`, {
+        query, 
+        range: scope
+      });
+      if(response.data.data==null)return [];
+      else return response.data.data.searchResults;
+    } catch (error) {
+      alert('搜索错误:'+error);
+      throw error;
+    }
+  };
+  
 
 
 /*用户搜索
@@ -196,20 +190,34 @@ respone:
     URemark(string),
     UImage(string) // 返回实际的头像URL
 */
+// export const login = async (email, password) => {
+//   try {
+//     alert("进入登录,输入为"+JSON.stringify(email)+" "+JSON.stringify(password));
+//     const response = await axios.post(`${API_BASE_URL}/user/login`, {
+//       Email: email,
+//       Password: password,
+//     });
+//     return response.data.data.userInfo;
+//     // return response.data;
+//   } catch (error) {
+//     alert("ERROR:"+error);
+//     throw error;
+//   }
+// };
 export const login = async (email, password) => {
-  try {
-    alert("进入登录,输入为"+JSON.stringify(email)+" "+JSON.stringify(password));
-    const response = await axios.post('http://localhost:3000/api/login', {
-      Email: email,
-      Password: password,
-    });
-    // 真后端：return response.data.data.userInfo;
-    return response.data;
-  } catch (error) {
-    alert("ERROR:"+error);
-    throw error;
-  }
-};
+    try {
+      alert("进入登录");
+      const response = await axios.post(`${API_BASE_URL}/user/login`, {
+        Email: email,
+        Password: password,
+      });
+      return response.data.data.userInfo;
+    } catch (error) {
+      console.error('Error logging in:', error);
+      throw error;
+    }
+  };
+  
 
 //粉丝数请求
 export const getFansNum = async () => {
@@ -255,9 +263,10 @@ export const api_ScheduleItems = async (uid) => {
     const response = await axios.post(`${API_BASE_URL}/user/schedule`, {
       userID: uid ,
     });
-    return response.data.data;
+    return response.data.data.ScheduleList;
   } catch (error) {
-    console.error('Error fetching schedule items:', error);
+    // console.error('Error fetching schedule items:', error);
+    alert('Error fetching schedule items:'+error);
     throw error;
   }
 };

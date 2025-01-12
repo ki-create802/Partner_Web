@@ -17,9 +17,12 @@
                 <label for="room_type">活动板块:</label>
                 <select id="room_type" v-model="roomType" required>
                 <option disabled value="">请选择板块</option>
-                <option value="exercise">运动</option>
-                <option value="fun">娱乐</option>
-                <option value="car">拼车</option>
+                <option value=1>运动</option>
+                <option value=3>娱乐</option>
+                <option value=2>拼车</option>
+                <option value=4>拼单</option>
+                <option value=5>约拍</option>
+                <option value=6>其他</option>
                 </select>
             </div>
 

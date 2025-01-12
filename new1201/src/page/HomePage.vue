@@ -125,7 +125,7 @@ export default {
           }
         });
       } catch (error) {
-       // alert("搜索信息失败");
+       alert("11搜索信息失败");
         console.error('搜索请求失败:', error);
       }
     },

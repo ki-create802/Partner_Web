@@ -5,7 +5,7 @@
       <SearchBox class="searchBox" :initialQuery="searchQuery" :initialScope="searchScope" @search="handleSearch" />
     </div>
     <div class="basicSelect">
-      <button @click="handleUserSearch">用户</button>
+      <button @click="handleUserSearch" :class="{ active: searchUser }">用户</button>
       <button @click="handleSearch({ query: searchQuery, scope: '拼车' })" :class="{ active: selectedScope === '拼车' }">拼车</button>
       <button @click="handleSearch({ query: searchQuery, scope: '运动' })" :class="{ active: selectedScope === '运动' }">运动</button>
       <button @click="handleSearch({ query: searchQuery, scope: '娱乐' })" :class="{ active: selectedScope === '娱乐' }">娱乐</button>
@@ -49,8 +49,10 @@ export default {
   },
   data() {
     return {
-      searchQuery: this.$route.query.q || '',
-      searchScope: this.$route.query.scope || '全部',
+      searchQuery: this.$route.query.q ,
+      searchScope: this.$route.query.scope,
+      //searchQuery: this.$route.query.q || '',
+      //searchScope: this.$route.query.scope || '全部',
       searchResults: [],
       userResults: [], // 存储用户搜索结果
       selectedScope: '',
@@ -63,8 +65,11 @@ export default {
       this.searchResults = JSON.parse(this.$route.query.results);
     }
     // 如果没有路由传参，执行 handleSearch
-    if (!this.searchQuery && this.searchResults.length === 0) {
+    if (!this.searchScope && this.searchResults.length === 0) {
       this.handleSearch({ query: '', scope: '全部' });
+    }
+    else{
+      this.selectedScope=this.searchScope;
     }
   },
   methods: {
@@ -75,15 +80,17 @@ export default {
         this.searchQuery = searchParams.query;
         this.searchScope = searchParams.scope;
         this.selectedScope = searchParams.scope; // 更新选中的范围
+        this.searchUser=false;
         this.searchUser = false; // 重置用户搜索状态
       } catch (error) {
         console.error('搜索请求失败:', error);
       }
     },
     async handleUserSearch() {
+      this.searchUser = true; // 设置用户搜索状态
+      this.selectedScope="";
       try {
         this.userResults = await searchUsers(this.searchQuery);
-        this.searchUser = true; // 设置用户搜索状态
       } catch (error) {
         alert("请求用户信息失败");
         console.error('用户搜索请求失败:', error);

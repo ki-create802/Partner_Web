@@ -30,6 +30,9 @@ type InChatController interface {
 	GetSpeakers(c *gin.Context)     //返回发言成员列表
 
 	SuccessMatch(c *gin.Context) //成功加入聊天室 添加到success_match表格中
+
+	GetPendingChats(c *gin.Context) //获取主页'等待中'板块聊天室列表
+	GetHistoryChats(c *gin.Context) //获取主页'历史'板块聊天室列表
 }
 
 func NewChatController() InChatController {
@@ -212,31 +215,34 @@ func (b ChatController) DisbandChatRoom(c *gin.Context) {
 	var request struct {
 		RoomID int `json:"roomID"`
 	}
-	c.Bind(&request)
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
 
 	roomID := request.RoomID
 
-	// 更新房间状态为 0，表示房间被删除
+	// 更新房间状态为 0，表示房间被解散
 	result := b.DB.Table("chatinfo").Where("cid = ?", roomID).Update("cstate", 0)
 	if result.Error != nil {
 		common.Fail(c, 500, nil, "更新房间状态失败")
 		return
 	}
 
-	// 从 success_match 表中删除所有成员
-	result = b.DB.Table("success_match").Where("cid = ?", roomID).Delete(&model.SuccessMatch{})
-	if result.Error != nil {
-		common.Fail(c, 500, nil, "从 success_match 表中删除所有成员失败")
+	// 获取聊天室的所有成员
+	var members []model.SuccessMatch
+	if err := b.DB.Table("success_match").Where("cid = ?", roomID).Find(&members).Error; err != nil {
+		common.Fail(c, 500, nil, "获取聊天室成员失败")
 		return
 	}
 
-	// 从 uc_match 表中删除所有成员
-	result = b.DB.Table("uc_match").Where("cid = ?", roomID).Delete(&model.UcMatch{})
-	if result.Error != nil {
-		common.Fail(c, 500, nil, "从 uc_match 表中删除所有成员失败")
-		return
+	// 更新每个成员的等级
+	for _, member := range members {
+		if err := b.UpdateUserLevel(member.UID); err != nil {
+			common.Fail(c, 500, nil, "更新用户等级失败")
+			return
+		}
 	}
-
 	common.Success(c, nil, "房间已成功解散")
 }
 
@@ -340,6 +346,7 @@ func (b ChatController) GetSpeakers(c *gin.Context) {
 
 	common.Success(c, gin.H{"speakerList": speakerList}, "成功返回发言成员列表")
 }
+
 func (b ChatController) CreateChat(c *gin.Context) { //创建聊天室 版块传消息的类型
 	var requestChat model.Room
 	c.Bind(&requestChat)
@@ -608,4 +615,145 @@ func (b ChatController) SaveChatRecords(c *gin.Context) { //存储聊天记录
 	}
 
 	common.Success(c, gin.H{"record": record}, "成功插入聊天室记录")
+}
+
+func (b ChatController) GetPendingChats(c *gin.Context) { //获取主页'等待中'板块聊天室列表
+	var request struct {
+		UserID uint `json:"userID"`
+	}
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	userID := request.UserID
+
+	// 获取未确认的聊天室（用户作为成员但未成功匹配）
+	var ucChats []model.ChatInfo
+	if err := b.DB.Table("chatinfo").
+		Joins("JOIN uc_match ON chatinfo.cid = uc_match.cid").
+		Where("uc_match.uid = ? AND chatinfo.cstate = 1", userID).
+		Where("NOT EXISTS (SELECT 1 FROM success_match WHERE success_match.cid = chatinfo.cid AND success_match.uid = ?)", userID).
+		Find(&ucChats).Error; err != nil {
+		common.Fail(c, 500, nil, "查询未确认聊天室失败")
+		return
+	}
+
+	// 获取已经成功匹配的聊天室（用户作为成员且已成功匹配）
+	var successChats []model.ChatInfo
+	if err := b.DB.Table("chatinfo").
+		Joins("JOIN success_match ON chatinfo.cid = success_match.cid").
+		Where("success_match.uid = ? AND chatinfo.cstate = 1", userID).
+		Find(&successChats).Error; err != nil {
+		common.Fail(c, 500, nil, "查询成功匹配聊天室失败")
+		return
+	}
+
+	// 获取用户作为群主的聊天室
+	var ownerChats []model.ChatInfo
+	if err := b.DB.Table("chatinfo").
+		Where("uid = ? AND cstate = 1", userID).
+		Find(&ownerChats).Error; err != nil {
+		common.Fail(c, 500, nil, "查询群主聊天室失败")
+		return
+	}
+
+	// 合并三个列表
+	var pendingChats []model.ChatInfo
+	pendingChats = append(pendingChats, ucChats...)
+	pendingChats = append(pendingChats, successChats...)
+	pendingChats = append(pendingChats, ownerChats...)
+
+	common.Success(c, gin.H{"pendingChats": pendingChats}, "成功返回等待中聊天室列表")
+}
+
+func (b ChatController) GetHistoryChats(c *gin.Context) { //获取历史聊天室列表
+	var request struct {
+		UserID uint `json:"userID"`
+	}
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	userID := request.UserID
+
+	// 查询用户作为成员的历史聊天室
+	var memberChats []model.ChatInfo
+	if err := b.DB.Table("chatinfo").
+		Joins("JOIN success_match ON chatinfo.cid = success_match.cid").
+		Where("success_match.uid = ? AND chatinfo.cstate = 0", userID).
+		Find(&memberChats).Error; err != nil {
+		common.Fail(c, 500, nil, "查询成员历史聊天室失败")
+		return
+	}
+
+	// 查询用户作为群主的历史聊天室
+	var ownerChats []model.ChatInfo
+	if err := b.DB.Table("chatinfo").
+		Where("uid = ? AND cstate = 0", userID).
+		Find(&ownerChats).Error; err != nil {
+		common.Fail(c, 500, nil, "查询群主历史聊天室失败")
+		return
+	}
+
+	// 合并两个列表
+	var historyChats []model.ChatInfo
+	historyChats = append(historyChats, memberChats...)
+	historyChats = append(historyChats, ownerChats...)
+
+	common.Success(c, gin.H{"historyChats": historyChats}, "成功返回历史聊天室列表")
+}
+
+// 更新用户等级
+func (b ChatController) UpdateUserLevel(uid uint) error {
+	// 获取用户作为成员的历史聊天室列表
+	var memberChats []model.ChatInfo
+	if err := b.DB.Table("chatinfo").
+		Joins("JOIN success_match ON chatinfo.cid = success_match.cid").
+		Where("success_match.uid = ? AND chatinfo.cstate = 0", uid).
+		Find(&memberChats).Error; err != nil {
+		return err
+	}
+
+	// 获取用户作为群主的历史聊天室列表
+	var ownerChats []model.ChatInfo
+	if err := b.DB.Table("chatinfo").
+		Where("uid = ? AND cstate = 0", uid).
+		Find(&ownerChats).Error; err != nil {
+		return err
+	}
+
+	// 合并两个列表并获取总数
+	count := len(memberChats) + len(ownerChats)
+
+	// 根据活动次数计算用户等级
+	var level int
+	switch {
+	case count >= 30:
+		level = 4 // 搭子达人
+	case count >= 20:
+		level = 3 // 高级搭子行家
+	case count >= 10:
+		level = 2 // 中级搭子爱好者
+	case count >= 5:
+		level = 1 // 初级搭子体验者
+	default:
+		level = 0 // 搭子探索者
+	}
+
+	// 更新或插入用户等级
+	userLevel := model.UserLevel{
+		UID:   uid,
+		Level: level,
+	}
+	result := b.DB.Table("user_level").
+		Where("uid = ?", uid).
+		Assign(map[string]interface{}{"level": level}).
+		FirstOrCreate(&userLevel)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }

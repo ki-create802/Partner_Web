@@ -52,3 +52,15 @@ type Record struct {
 	RContent   string    `gorm:"column:rcontent" json:"text"`
 	RTime      time.Time `gorm:"column:rtime"`
 }
+
+type ChatInfo struct {
+	CID         int       `gorm:"column:cid"`
+	CName       string    `gorm:"column:cname"`
+	Bid         int       `gorm:"column:bid"`
+	Uid         int       `gorm:"column:uid"`
+	Cnumber     int       `gorm:"column:cnumber"`
+	Cstate      int       `gorm:"column:cstate"`
+	CYueDate    string    `gorm:"column:c_yue_date"`
+	CCreateTime time.Time `gorm:"column:c_create_time"`
+	Cremark     string    `gorm:"column:cremark"`
+}

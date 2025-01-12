@@ -103,11 +103,14 @@
 
 <script>
 //import axios from 'axios';
+import { search } from '@/api.js';
+
 export default{
     name: 'MoDule',
     methods: {
         async handleSearch(searchParams) {
-            console.log(searchParams);
+            const response = await search(searchParams);
+            alert(JSON.stringify(response));
             // try {
             //     const { query, scope } = searchParams;
             //     // 向后端发送搜索请求
@@ -126,6 +129,7 @@ export default{
             //     alert("搜索信息失败");
             //     console.error('搜索请求失败:', error);
             // }
+
         }
     }
 }

@@ -23,3 +23,17 @@ type ScheduleItem struct { //行程返回数据结构
 	Date    string `json:"date"`    // 日期，字符串形式
 	Content string `json:"content"` // 行程具体内容，字符串形式
 }
+
+// UserLevel 用户等级
+type UserLevel struct {
+	UID   uint `gorm:"column:uid;not null;primaryKey" json:"userID"`
+	Level int  `gorm:"column:level;not null" json:"level"`
+}
+
+// UserReview 用户评分
+type UserReview struct {
+	ReviewID    uint `gorm:"column:review_id;primaryKey;autoIncrement" json:"reviewID"`
+	ReviewerUID uint `gorm:"column:reviewer_uid;not null" json:"reviewerUID"`
+	ReviewedUID uint `gorm:"column:reviewed_uid;not null" json:"reviewedUID"`
+	Rating      int  `gorm:"column:rating;not null" json:"rating"`
+}

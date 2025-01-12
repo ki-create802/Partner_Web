@@ -55,17 +55,16 @@
 </template>
 
 <script>
-import axios from 'axios';
+import { search } from '@/api.js';
+
 export default {
     name: 'MoDule',
     methods: {
-        async handleSearch(searchParams) {
-            console.log(searchParams);
+        async handleSearch(searchParams) {     
             try {
                 const { query, scope } = searchParams;
                 // 向后端发送搜索请求
-                const response = await axios.get(`http://localhost:3000/api/search`);///
-                const searchResults = response.data;
+                const searchResults = await search(query, scope);
                 // 导航到 FindPage 并传递搜索内容和结果
                 this.$router.push({
                     name: 'FindPage',

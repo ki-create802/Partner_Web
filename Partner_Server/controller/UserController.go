@@ -30,6 +30,11 @@ type InUserController interface {
 	ForgotPassword(c *gin.Context)  //忘记密码
 	VerifyResetCode(c *gin.Context) //验证验证码
 	Schedule(c *gin.Context)        //首页行程推送
+
+	AddReview(c *gin.Context)      //评分功能
+	GetUserReviews(c *gin.Context) //获取评分
+	GetUserLevel(c *gin.Context)   //获取用户等级
+
 }
 
 func NewUserController() InUserController {
@@ -94,10 +99,15 @@ func (a UserController) Login(c *gin.Context) {
 	userEmail := requestUser.UEmail
 	password := requestUser.UKey
 
-	//fmt.Println("email:", userEmail, "  password:", password)
+	fmt.Println("email:", userEmail, "  password:", password)
 	// 数据验证
 	var user model.User
-	a.DB.Table("user").Where("UEmail=?", userEmail).First(&user)
+	a.DB.Table("user").Debug().Where("uemail=?", userEmail).First(&user)
+
+	fmt.Println("user:", user)
+	// a.DB.Table("user").Debug().Find(&user)
+	// fmt.Println("1111111userid:", user.UID)
+
 	if user.UID == 0 {
 		common.Fail(c, 422, nil, "用户不存在")
 		return
@@ -412,4 +422,119 @@ func (a UserController) Schedule(c *gin.Context) { //返回用户行程
 		ScheduleList = append(ScheduleList, scheduleItem) //在上面房主的基础上加
 	}
 	common.Success(c, gin.H{"ScheduleList": ScheduleList}, "返回行程成功")
+}
+
+func (a UserController) AddReview(c *gin.Context) {
+	var request struct {
+		ReviewerUID uint `json:"reviewerUID"`
+		ReviewedUID uint `json:"reviewedUID"`
+		Rating      int  `json:"rating"`
+	}
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	// 验证评分范围
+	if request.Rating < 1 || request.Rating > 5 {
+		common.Fail(c, 400, nil, "评分必须在1到5之间")
+		return
+	}
+
+	// 创建评价记录
+	newReview := model.UserReview{
+		ReviewerUID: request.ReviewerUID,
+		ReviewedUID: request.ReviewedUID,
+		Rating:      request.Rating,
+	}
+
+	result := a.DB.Table("user_review").Create(&newReview)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "打分失败")
+		return
+	}
+
+	common.Success(c, nil, "打分成功")
+}
+
+// 获取评分
+func (a UserController) GetUserReviews(c *gin.Context) {
+	var request struct {
+		UID uint `json:"userID"`
+	}
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	// 查询用户的所有评分
+	var reviews []struct {
+		ReviewerUID uint `json:"reviewerUID"`
+		Rating      int  `json:"rating"`
+	}
+	result := a.DB.Table("user_review").
+		Select("reviewer_uid, rating").
+		Where("reviewed_uid = ?", request.UID).
+		Find(&reviews)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "获取评价失败")
+		return
+	}
+
+	// 计算平均分
+	var totalRating int
+	for _, review := range reviews {
+		totalRating += review.Rating
+	}
+	averageRating := 0.0
+	if len(reviews) > 0 {
+		averageRating = float64(totalRating) / float64(len(reviews))
+	}
+
+	// 返回结果
+	common.Success(c, gin.H{
+		"reviews":       reviews,       // 所有评分记录
+		"averageRating": averageRating, // 平均分
+	}, "成功获取用户评价")
+}
+
+// 获取等级
+func (a UserController) GetUserLevel(c *gin.Context) {
+	var request struct {
+		UID uint `json:"userID"`
+	}
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	// 查询用户等级
+	var userLevel struct {
+		Level int `gorm:"column:level"`
+	}
+	result := a.DB.Table("user_level").Where("uid = ?", request.UID).First(&userLevel)
+	if result.Error != nil {
+		// 如果用户没有等级记录，默认为 0（搭子探索者）
+		userLevel.Level = 0
+	}
+
+	// 根据等级返回称号
+	var levelTitle string
+	switch userLevel.Level {
+	case 0:
+		levelTitle = "搭子探索者"
+	case 1:
+		levelTitle = "初级搭子体验者"
+	case 2:
+		levelTitle = "中级搭子爱好者"
+	case 3:
+		levelTitle = "高级搭子行家"
+	case 4:
+		levelTitle = "搭子达人"
+	default:
+		levelTitle = "未知等级"
+	}
+
+	// 返回结果
+	common.Success(c, gin.H{"levelTitle": levelTitle}, "成功获取用户等级称号")
 }

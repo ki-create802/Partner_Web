@@ -20,7 +20,7 @@
 
 <script>
 import ScheduleList from './ScheduleList.vue';
-import axios from 'axios';
+import { api_ScheduleItems } from '@/api.js';
 
 export default {
   name: 'ACalendar',
@@ -79,14 +79,9 @@ export default {
         }
         const uid = user.UID;
       //向后端发送请求个人日程请求
-      
-        const response = await axios.get('http://localhost:3000/api/schedule', 
-        {
-          params:{
-            Uid: uid,
-          },
-        });
-        this.scheduleItems = response.data;
+        const response=await api_ScheduleItems(uid);
+        alert("个人行程："+JSON.stringify(response));
+        this.scheduleItems = response;
         this.$emit('update-schedule-items', this.scheduleItems);
       } catch (error) {
         console.error('There was an error fetching the schedule items!', error);
