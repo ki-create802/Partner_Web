@@ -33,6 +33,8 @@ type InChatController interface {
 
 	GetPendingChats(c *gin.Context) //获取主页'等待中'板块聊天室列表
 	GetHistoryChats(c *gin.Context) //获取主页'历史'板块聊天室列表
+
+	GetTopChatRooms(c *gin.Context) //火文推送
 }
 
 func NewChatController() InChatController {
@@ -349,15 +351,21 @@ func (b ChatController) GetSpeakers(c *gin.Context) {
 
 func (b ChatController) CreateChat(c *gin.Context) { //创建聊天室 版块传消息的类型
 	var requestChat model.Room
-	c.Bind(&requestChat)
-	//var BID_Info struct { //定义一个结构体接收版块id
-	//	BID int `gorm:"column:bid"`
-	//}
-	//result := b.DB.Table("block").Select("bid").Where("bname =?", block).First(&BID_Info)
-	//if result.Error != nil {
-	//	common.Fail(c, 500, nil, "查询数据库错误")
-	//	return
-	//}
+	// c.Bind(&requestChat)
+
+	// fmt.Println("bid", requestChat.Bid)
+	if err := c.Bind(&requestChat); err != nil {
+		common.Fail(c, 400, nil, "请求参数错误: "+err.Error())
+		fmt.Println("请求参数错误: ", err.Error())
+		return
+	}
+
+	// 检查必要字段
+	if requestChat.Bid == 0 || requestChat.Name == "" || requestChat.Uid == 0 {
+		common.Fail(c, 400, nil, "版块ID、聊天室名称或用户ID不能为空")
+		fmt.Println("版块ID、聊天室名称或用户ID不能为空")
+		return
+	}
 
 	currentTime := time.Now() //获取当前时间
 
@@ -375,6 +383,7 @@ func (b ChatController) CreateChat(c *gin.Context) { //创建聊天室 版块传
 	result := b.DB.Table("chatinfo").Create(&newChat)
 	if result.Error != nil {
 		common.Fail(c, 500, nil, "新增聊天室信息数据库错误")
+		fmt.Println("新增聊天室信息数据库错误")
 		return
 	}
 
@@ -756,4 +765,102 @@ func (b ChatController) UpdateUserLevel(uid uint) error {
 	}
 
 	return nil
+}
+
+func (b ChatController) GetTopChatRooms(c *gin.Context) {
+	// 获取当前时间
+	currentTime := time.Now()
+	// 计算一天前的时间
+	oneDayAgo := currentTime.Add(-24 * time.Hour)
+
+	// 查询最近一天内聊天记录数最多的十个聊天室
+	var topChatRooms []struct {
+		CID         uint      `gorm:"column:cid"`
+		CName       string    `gorm:"column:cname"`
+		Bid         int       `gorm:"column:bid"`
+		Uid         uint      `gorm:"column:uid"`
+		CNumber     int       `gorm:"column:cnumber"`
+		CState      int       `gorm:"column:cstate"`
+		CYueDate    string    `gorm:"column:c_yue_date"`
+		CCreateTime time.Time `gorm:"column:c_create_time"`
+		CRemark     string    `gorm:"column:cremark"`
+		RecordCount int       `gorm:"column:record_count"`
+	}
+
+	result := b.DB.Table("record").
+		Select("chatinfo.cid, chatinfo.cname, chatinfo.bid, chatinfo.uid, chatinfo.cnumber, chatinfo.cstate, chatinfo.c_yue_date, chatinfo.c_create_time, chatinfo.cremark, COUNT(record.cid) as record_count").
+		Joins("JOIN chatinfo ON record.cid = chatinfo.cid").
+		Where("record.rtime BETWEEN ? AND ?", oneDayAgo, currentTime).
+		Group("record.cid").
+		Order("record_count DESC").
+		Limit(10).
+		Find(&topChatRooms)
+
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "查询聊天室记录失败")
+		return
+	}
+
+	// 构造返回数据
+	var response []map[string]interface{}
+	for _, chatRoom := range topChatRooms {
+		// 查询房主信息
+		var roomOwner model.User
+		result := b.DB.Table("user").
+			Where("uid = ?", chatRoom.Uid).
+			First(&roomOwner)
+		if result.Error != nil {
+			common.Fail(c, 500, nil, "查询房主信息失败")
+			return
+		}
+
+		// 查询 success_match 表，获取成员列表
+		var successMatches []struct {
+			UID uint `gorm:"column:uid"`
+		}
+		result = b.DB.Table("success_match").
+			Select("uid").
+			Where("cid = ?", chatRoom.CID).
+			Find(&successMatches)
+		if result.Error != nil {
+			common.Fail(c, 500, nil, "查询成员列表失败")
+			return
+		}
+
+		// 构建成员列表
+		var memberList []map[string]interface{}
+		for _, match := range successMatches {
+			// 查询 user 表，获取成员信息
+			var user model.User
+			result = b.DB.Table("user").
+				Where("uid = ?", match.UID).
+				First(&user)
+			if result.Error != nil {
+				common.Fail(c, 500, nil, "查询成员信息失败")
+				return
+			}
+
+			// 构建成员信息
+			member := map[string]interface{}{
+				"memberID":  user.UID,
+				"memberImg": user.UImage,
+			}
+			memberList = append(memberList, member)
+		}
+
+		// 构建聊天室信息
+		roomInfo := map[string]interface{}{
+			"roomID":        chatRoom.CID,
+			"roomName":      chatRoom.CName,
+			"roomIntro":     chatRoom.CRemark,
+			"roomOwnerID":   chatRoom.Uid,
+			"roomOwnerName": roomOwner.UName,
+			"roomOwnerImg":  roomOwner.UImage,
+			"recordCount":   chatRoom.RecordCount,
+			"memberList":    memberList, // 添加成员列表
+		}
+		response = append(response, roomInfo)
+	}
+
+	common.Success(c, gin.H{"topChatRooms": response}, "成功返回最近一天内聊天记录数最多的十个聊天室")
 }

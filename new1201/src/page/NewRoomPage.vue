@@ -78,6 +78,7 @@
 <script>
 import GuideBar from '../components/GuideBar.vue';
 import { ElDatePicker } from "element-plus";
+import { newRoom } from '@/api';
 export default{
     name:'NewRoomPage',
     components:{
@@ -87,7 +88,7 @@ export default{
     data(){
         return{
             roomname:"",
-            roomType:"",
+            roomType:0,
             people_num:"",
             selectedDate:"",
             //selectedDate:[],
@@ -96,13 +97,46 @@ export default{
     },
     setup(){
     },
+    // methods: {
+    //     async handleSubmit() {
+    //         if (this.roomname && this.roomType && this.people_num && this.selectedDate) {
+    //             alert(
+    //             `聊天室 "${this.roomname}" 创建成功！类型: ${this.roomType}, 时间: ${this.selectedDate}`
+    //             );
+    //             this.$router.push("/ChatPage");
+    //         } else {
+    //             alert("请填写所有字段！");
+    //         }
+    //     },
+    //     validateNumberInput() {
+    //         // 通过正则移除非数字字符
+    //         this.people_num = this.people_num.replace(/\D/g, "");
+    //     },
+    // },
     methods: {
+        formatDate(date) {
+            if (!date) return ''; // 如果日期为空，返回空字符串
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从 0 开始，需要 +1
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        },
         async handleSubmit() {
-            if (this.roomname && this.roomType && this.people_num && this.selectedDate) {
-                alert(
-                `聊天室 "${this.roomname}" 创建成功！类型: ${this.roomType}, 时间: ${this.selectedDate}`
-                );
-                this.$router.push("/ChatPage");
+            if (this.roomname && this.roomType && this.people_num && this.formatDate(this.selectedDate)) {
+                let uid=0;
+                try {
+                    const storedUser = localStorage.getItem('user');
+                    if (storedUser) {
+                        const user = JSON.parse(storedUser);
+                        uid = user.UID;
+                    }
+                } catch {
+                    alert("获取本地个人信息失败");
+                }
+                let ok=false;
+                ok=await newRoom(this.roomname,this.roomType,uid,this.people_num,this.formatDate(this.selectedDate),this.remark);
+                if(ok)this.$router.push("/ChatPage");
+                
             } else {
                 alert("请填写所有字段！");
             }

@@ -29,7 +29,8 @@
             </p>
   
           <!-- 验证码输入框 -->
-          <div v-if="isCodeSent" class="form-group">
+          <!--div v-if="isCodeSent" class="form-group"-->
+          <div  class="form-group"> 
             <input
               type="text"
               v-model="verificationCode"
@@ -74,6 +75,8 @@
   </template>
   
   <script>
+  import { checkCode } from '@/api';
+  import {forgetPW} from '../api';
   export default {
     name: "ForgotPWPage",
     data() {
@@ -88,15 +91,19 @@
       };
     },
     methods: {
-      sendVerificationCode() {
+      async sendVerificationCode() {
         if (this.email) {
-          alert("Verification code sent to your email.");
+          let ok=false;
+          ok =await forgetPW(this.email);
+          if(!ok)return;
+          alert("验证码已经发送到邮箱");
           this.isCodeSent = true; // 禁用按钮
           this.countdown = 60; // 设置倒计时初始值
           this.startCountdown(); // 开始倒计时
         } else {
-          alert("Please enter a valid email address.");
+          alert("请输入邮箱");
         }
+      },
         // if (this.email) {
         //   this.isCodeSent = true; // 模拟验证码发送逻辑
         //   alert("Verification code sent to your email.");
@@ -109,7 +116,7 @@
         // // 开始倒计时
         // this.isCodeSent = true;
         // this.startCountdown();
-      },
+      
       startCountdown() {
         const interval = setInterval(() => {
           this.countdown -= 1; // 每秒减少倒计时
@@ -119,13 +126,14 @@
           }
         }, 1000); // 每秒执行一次
       },
-      handleVerifyCode() {
+      async handleVerifyCode() {
         // 模拟验证验证码逻辑
-        if (this.verificationCode === "1234") {
+        const ok=await checkCode(this.email,this.verificationCode)
+        if (ok) {
           this.showResetPasswordModal = true;
           this.isCodeSent = false; // 确保隐藏验证码和邮箱表单
         } else {
-          alert("Invalid verification code.");
+          alert("验证码错误");
         }
       },
       resetPassword() {

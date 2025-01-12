@@ -31,9 +31,9 @@ type InUserController interface {
 	VerifyResetCode(c *gin.Context) //验证验证码
 	Schedule(c *gin.Context)        //首页行程推送
 
-	AddReview(c *gin.Context)      //评分功能
-	GetUserReviews(c *gin.Context) //获取评分
-	GetUserLevel(c *gin.Context)   //获取用户等级
+	//AddReview(c *gin.Context)      //评分功能
+	//GetUserReviews(c *gin.Context) //获取评分
+	GetUserLevel(c *gin.Context) //获取用户等级
 
 }
 

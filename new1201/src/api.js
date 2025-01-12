@@ -283,3 +283,58 @@ export const changeRoomStatus = async (roomId, status) => {
     throw error;
   }
 };
+
+// 新建房间
+export const newRoom = async (roomName, typeID,Uid,memberNum,dateTime,remark) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/chat/createChat`, {
+      Name:roomName,
+      Bid:Number(typeID),
+      Uid:Uid,
+      Cnumber:Number(memberNum),
+      CYueDate:dateTime,
+      Cremark:remark
+    });
+    alert(JSON.stringify(response));
+    alert("chat新建："+JSON.stringify({roomName, typeID,Uid,memberNum,dateTime,remark}));
+    if (response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    
+    alert("新建房间失败");
+    console.error('Error signing up:', error);
+    throw error;
+    
+  }
+};
+
+//api重置密码
+export const checkCode = async (email,code) => {
+  alert("邮箱："+email+"验证码"+code);
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/verify-reset-code`, {
+      email,
+      code
+    });
+    if(response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    console.error('Error signing up:', error);
+    throw error;
+  }
+};
+
+//忘记密码
+export const forgetPW = async (email) => {
+  alert("邮箱："+email);
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/forgot-password`, {
+      email,
+    });
+    if(response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    console.error('Error signing up:', error);
+    throw error;
+  }
+};
