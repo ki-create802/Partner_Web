@@ -1,6 +1,6 @@
 <template>
     <div class="topbar">
-        <TopBar />
+        <GuideBar />
     </div>
     <div class="user-info">
         <InformationBox />
@@ -43,8 +43,8 @@
 </template>
 
 <script>
-import TopBar from '../components/TopBar.vue';
 import InformationBox from '../components/InformationBox.vue';
+import GuideBar from '@/components/GuideBar.vue';
 
 export default {
     name: 'HomePage',
@@ -54,7 +54,7 @@ export default {
         }
     },
     components: {
-        TopBar,
+        GuideBar,
         InformationBox,
     },
 }
