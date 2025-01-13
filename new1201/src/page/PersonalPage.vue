@@ -1,6 +1,6 @@
 <template>
     <div class="topbar">
-        <TopBar />
+        <GuideBar />
     </div>
     <div class="user-info">
         <InformationBox />
@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import TopBar from '../components/TopBar.vue';
+import GuideBar from '../components/GuideBar.vue';
 import InformationBox from '../components/InformationBox.vue';
 
 export default {
@@ -54,7 +54,7 @@ export default {
         }
     },
     components: {
-        TopBar,
+        GuideBar,
         InformationBox,
     },
 }
@@ -71,7 +71,13 @@ export default {
     background-size: cover;  /* 背景图自动适应尺寸 */
     background-position: center center;  /* 背景图居中 */
     background-repeat: no-repeat;  /* 不重复背景图 */
-    z-index: -1;             /* 确保背景图位于所有内容的下方 */
+    background-size: cover;  /* 背景图自动适应尺寸 */
+    background-position: center center;  /* 背景图居中 */
+    background-repeat: no-repeat;  /* 不重复背景图 */
+    z-index: -1;             /* 确保背景图位于所有内容的下方 */        
+}
+.topbar {
+    width: 100vw;
 }
 .more-info {
     /* position: absolute; */
@@ -81,6 +87,7 @@ export default {
     width: 100vw;
 }
 .user-info {
+    width: 100vw;
     margin-top: 90px;
 }
 .achievement {
