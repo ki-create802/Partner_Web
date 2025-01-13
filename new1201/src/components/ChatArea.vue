@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="messages">
-      <AMessage v-for="message in messages" :key="message.id" :message="message" :is-current-user="message.senderId === uid"/>
+      <AMessage v-for="message in messages" :key="message.id" :message="message" :is-current-user="message.UID === uid"/>
     </div>
     <div class="input-area">
       <input type="text" v-model="newMessage" @keyup.enter="sendMessage" placeholder="输入消息..." />
@@ -31,10 +31,10 @@
           <li v-for="chatmember in chatMembers" :key='chatmember.id' >
             <div class="addMemberList">
               <div class="addmemberInfo">
-                <img class="avatar" :src="'http://localhost:3000/' + chatmember.avatar">
-                成员名{{ chatmember.name }}
+                <img class="avatar" :src="`http://localhost:8082/avatars/${chatmember.userID}.jpg`">
+                成员名{{ chatmember.userName }}
               </div>
-              <button @click="addMember(chatmember.id)">添加</button>
+              <button @click="addMember(chatmember.userID)">添加</button>
             </div>
           </li>
         </ul>
@@ -45,8 +45,6 @@
         <h3>设置</h3>
         <!-- 设置的表单或内容 -->
          <div class="setting">
-          <button v-if="isSecret" @click="setPublic">将房间设置为公开</button>
-          <button v-else @click="setSecret">将房间设置为私密</button>
           <button @click="dissolveRoom">解散房间</button>
          </div>
       </div>
@@ -59,10 +57,10 @@
           <li v-for="roomMember in roomMembers" :key='roomMember.id' >
             <div class="roomMemberList">
               <div class="roomMemberInfo">
-                <img class="avatar" :src="'http://localhost:3000/' + roomMember.avatar">
-                成员名{{ roomMember.name }}
+                <img class="avatar" :src="`http://localhost:8082/avatars/${roomMember.userID}.jpg`">
+                {{ roomMember.userName }}
               </div>
-              <button @click="removeMember(roomMember.id)">删除</button>
+              <button v-if="isRoomOwner" @click="removeMember(roomMember.userID)">删除</button>
             </div>
           </li>
         </ul>
@@ -99,6 +97,10 @@ export default {
     },
     roomMembers:{
       type: Array,
+    },
+    isRoomOwner:{
+      type:Boolean,
+      required:true,
     }
   },
   data() {

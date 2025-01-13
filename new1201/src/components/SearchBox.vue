@@ -33,6 +33,7 @@ export default {
   methods: {
     handleInput() {
       // 当输入框内容变化时触发
+      if(this.searchQuery==null)return;
       this.$emit('input', this.searchQuery);
     },
     handleSearch() {

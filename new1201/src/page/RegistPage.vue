@@ -12,7 +12,18 @@
                     required
                 />
             </div>
-  
+            
+            <div class="form-group">
+                <label for="username">姓名:</label>
+                <input
+                    type="username"
+                    id="username"
+                    v-model="username"
+                    placeholder="请输入您的用户名"
+                    required
+                />
+            </div>
+
             <div class="form-group">
                 <label for="password">密码:</label>
                 <input
@@ -45,29 +56,37 @@
 </template>
   
   <script>
+  import {signUp} from '@/api';
   export default {
     name: "UserSignUp",
     data() {
         return {
             email: "",
             password: "",
+            username:"",
             confirmPassword: "",
             errorMessage: "",
         };
     },
     methods: {
-      handleSignUp() {
-        if (!this.email || !this.password || !this.confirmPassword) {
-            this.errorMessage = "Please fill in all fields.";
+      async handleSignUp() {
+        if (!this.email || !this.username || !this.password || !this.confirmPassword) {
+            this.errorMessage = "请输入所有字段";
             return;
         }
         if (this.password !== this.confirmPassword) {
-            this.errorMessage = "Passwords do not match.";
+            this.errorMessage = "两次输入的密码不匹配";
             return;
         }
-  
-        alert("Sign-up successful!");
-        this.errorMessage = "";
+        try{
+            let ok=await signUp(this.username,this.email,this.password);
+            if(ok){
+                alert("注册成功");
+                this.errorMessage = "";
+            }
+        }catch{
+            this.errorMessage = "注册失败";
+        }
       },
     },
   };

@@ -2,7 +2,7 @@
   <body>
     <GuideBar />
     <div class="searchContainer">
-      <SearchBox class="searchBox" :initialQuery="searchQuery" :initialScope="searchScope" @search="handleSearch" />
+      <SearchBox class="searchBox" :initialQuery="searchQuery" :initialScope="searchScope" @search="handleSearch" @input="inputChange" />
     </div>
     <div class="basicSelect">
       <button @click="handleUserSearch" :class="{ active: searchUser }">用户</button>
@@ -73,6 +73,9 @@ export default {
     }
   },
   methods: {
+    inputChange(input){
+      this.searchQuery=input;
+    },
     async handleSearch(searchParams) {
       try {
         const data=await search(searchParams.query,searchParams.scope);

@@ -342,28 +342,40 @@ func (a UserController) ForgotPassword(c *gin.Context) {
 	var Message model.EmailMessage
 	c.Bind(&Message)
 	email := Message.Email
+
 	// 如果电子邮件地址为空，返回400错误
 	if email == "" {
 		common.Fail(c, 400, gin.H{"error": "Email is required"}, "电子邮件地址为空")
 		return
 	}
 
-	//调用GenerateRandomCode生成随机六位数
+	// 检查邮箱是否已注册
+	var user model.User
+	a.DB.Table("user").Where("uemail=?", email).First(&user)
+	if user.UID == 0 {
+		common.Fail(c, 422, nil, "该邮箱未注册")
+		return
+	}
+
+	// 调用GenerateRandomCode生成随机六位数
 	code := utils.GenerateRandomCode(6)
-	//调用SendVerificationCode函数发送验证码到用户的电子邮件。
+
+	// 调用SendVerificationCode函数发送验证码到用户的电子邮件
 	err := services.SendVerificationCode(email, code)
 	if err != nil {
 		common.Fail(c, 500, gin.H{"error": "Failed to send verification code"}, "服务器错误")
 		return
 	}
-	//初始化redis客户端
+
+	// 初始化redis客户端
 	redisClient := redis.NewRedisClient()
 	err = redisClient.SetCode(email, code, 5*time.Minute) // 设置验证码有效期为5分钟
 	if err != nil {
-		//存储验证码失败
+		// 存储验证码失败
 		common.Fail(c, 500, gin.H{"error": "Failed to store verification code"}, "服务器错误")
 		return
 	}
+
 	common.Success(c, gin.H{"message": "Verification code sent to your email."}, "成功发送验证码到邮箱")
 }
 
