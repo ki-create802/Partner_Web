@@ -7,7 +7,7 @@
     <div class="mylist">
       <ul>
         <li v-for="chat in chats" :key="chat.id" @click="selectChat(chat)">
-          <img class="roomOwnerImg" :src="'http://localhost:3000/'+chat.ownerImage"/>
+          <img class="roomOwnerImg" :src="`http://localhost:8082/avatars/${chat.ownerId}.jpg`"/>
           {{ chat.name }}
         </li>
       </ul>
