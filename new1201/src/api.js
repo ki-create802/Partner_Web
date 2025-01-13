@@ -342,9 +342,9 @@ export const forgetPW = async (email) => {
 //重新设置密码
 export const resetPW = async (email,newPW) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/??`, {
-      email,
-      newPW
+    const response = await axios.post(`${API_BASE_URL}/user/resetPassword`, {
+      Email:email,
+      NewPassword:newPW
     });
     if(response.data.code==200)return true;
     else return false;

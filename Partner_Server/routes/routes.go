@@ -27,7 +27,8 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		userRoutes.POST("schedule", userController.Schedule)                 //推送行程
 		//userRoutes.POST("addReview", userController.AddReview)               // 添加评分
 		//userRoutes.POST("getUserReviews", userController.GetUserReviews)     // 获取用户评分
-		userRoutes.POST("getUserLevel", userController.GetUserLevel) // 获取用户等级称号
+		userRoutes.POST("getUserLevel", userController.GetUserLevel)   // 获取用户等级称号
+		userRoutes.POST("resetPassword", userController.ResetPassword) //重置密码
 	}
 
 	chatController := controller.NewChatController()

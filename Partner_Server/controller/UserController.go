@@ -12,7 +12,13 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+
 	//"golang.org/x/crypto/bcrypt"
+	"crypto/rand"
+	"io"
+	"math/big"
+	"os"
+	"path/filepath"
 )
 
 type UserController struct {
@@ -35,6 +41,8 @@ type InUserController interface {
 	//GetUserReviews(c *gin.Context) //获取评分
 	GetUserLevel(c *gin.Context) //获取用户等级
 
+	ResetPassword(c *gin.Context) //重置密码
+
 }
 
 func NewUserController() InUserController {
@@ -42,6 +50,39 @@ func NewUserController() InUserController {
 	db.Table("user").AutoMigrate(model.User{})
 	//db.Table("admin").AutoMigrate(model.User{})
 	return UserController{DB: db}
+}
+
+// 从 default1.jpg ~ default6.jpg 中随机选择一个图片
+func selectRandomDefaultImage() (string, error) {
+	// 生成一个 1~6 的随机数
+	randomNum, err := rand.Int(rand.Reader, big.NewInt(6))
+	if err != nil {
+		return "", fmt.Errorf("生成随机数失败: %v", err)
+	}
+	imageName := fmt.Sprintf("default%d.jpg", randomNum.Int64()+1)
+	imagePath := filepath.Join("avatars", imageName)
+	return imagePath, nil
+}
+
+// 复制文件
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("打开源文件失败: %v", err)
+	}
+	defer sourceFile.Close()
+
+	destinationFile, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("创建目标文件失败: %v", err)
+	}
+	defer destinationFile.Close()
+
+	_, err = io.Copy(destinationFile, sourceFile)
+	if err != nil {
+		return fmt.Errorf("复制文件失败: %v", err)
+	}
+	return nil
 }
 
 // 注册
@@ -55,7 +96,6 @@ func (a UserController) Register(c *gin.Context) { //未完成
 	userEmail := requestUser.UEmail
 	password := requestUser.UKey
 	//userremark := requestUser.URemark
-	//userimage := requestUser.UImage //暂时是为空的！！！！！！！！！！！！都不需要传 来一个默认的
 
 	//加个注册验证邮箱
 
@@ -67,9 +107,6 @@ func (a UserController) Register(c *gin.Context) { //未完成
 		return
 	}
 
-	//// 密码加密
-	//hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
 	// 创建用户
 	newUser := model.User{
 		UName:  userName,
@@ -77,17 +114,48 @@ func (a UserController) Register(c *gin.Context) { //未完成
 		//Password:    string(hashedPassword),
 		UKey: password,
 		//URemark: userremark,
-		//UImage:  userimage,
 	}
-	a.DB.Table("user").Create(&newUser)
-	//***********************************************************
-	//密码加密功能
-	//对于用户名要不要不让重复
-	//默认头像图标11111111111111111111111111111111111111111111
-	//************************************************************
+	// a.DB.Table("user").Create(&newUser)
+	if err := a.DB.Table("user").Debug().Create(&newUser).Error; err != nil {
+		common.Fail(c, 500, nil, "创建用户失败: "+err.Error())
+		return
+	}
+	// // 返回成功响应
+	// common.Success(c, gin.H{"newUser": newUser}, "注册成功")
+	// 查询新创建的用户，获取 UID
+	var createdUser model.User
+	a.DB.Table("user").Where("UEmail=?", userEmail).First(&createdUser)
+	if createdUser.UID == 0 {
+		common.Fail(c, 500, nil, "无法获取用户ID")
+		return
+	}
 
+	// 随机选择一个默认头像
+	defaultImagePath, err := selectRandomDefaultImage()
+	fmt.Println("默认头像路径：", defaultImagePath)
+	if err != nil {
+		common.Fail(c, 500, nil, "选择默认头像失败: "+err.Error())
+		return
+	}
+
+	// 复制并重命名头像文件
+	newImagePath := filepath.Join("avatars", fmt.Sprintf("%d.jpg", createdUser.UID))
+	fmt.Println("重命名：", newImagePath)
+	if err := copyFile(defaultImagePath, newImagePath); err != nil {
+		common.Fail(c, 500, nil, "复制头像文件失败: "+err.Error())
+		return
+	}
+
+	// 更新用户头像路径
+	createdUser.UImage = newImagePath
+	// 更新用户头像路径
+	if err := a.DB.Table("user").Where("uid = ?", createdUser.UID).Update("uimage", newImagePath).Error; err != nil {
+		common.Fail(c, 500, nil, "更新用户头像失败: "+err.Error())
+		return
+	}
+	fmt.Println("新用户：", createdUser)
 	// 返回成功响应
-	common.Success(c, gin.H{"newUser": newUser}, "注册成功")
+	common.Success(c, gin.H{"newUser": createdUser}, "注册成功")
 }
 
 // Login 登录
@@ -537,4 +605,36 @@ func (a UserController) GetUserLevel(c *gin.Context) {
 
 	// 返回结果
 	common.Success(c, gin.H{"levelTitle": levelTitle}, "成功获取用户等级称号")
+}
+
+// 重置密码
+func (a UserController) ResetPassword(c *gin.Context) {
+	var request struct {
+		Email       string `json:"email"`
+		NewPassword string `json:"newPassword"`
+	}
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	// 验证邮箱是否存在
+	var user model.User
+	a.DB.Table("user").Where("uemail=?", request.Email).First(&user)
+	if user.UID == 0 {
+		common.Fail(c, 422, nil, "该邮箱未注册")
+		return
+	}
+
+	// 更新密码
+	updateData := model.User{
+		UKey: request.NewPassword,
+	}
+	result := a.DB.Table("user").Where("uemail=?", request.Email).Updates(updateData)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "密码更新失败")
+		return
+	}
+
+	common.Success(c, nil, "密码更新成功")
 }

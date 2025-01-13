@@ -15,7 +15,7 @@
               <button @click="toNewRoomPage" title="新建房间">+</button>
             </div>
             <div class="userInfo" @mouseenter="showOptions = true" @mouseleave="showOptions = false">
-              <img :src="LogoImage" class="userImg" />
+              <img :src="UserAvater" class="userImg" />
               <OptionsOfGuideBar v-if="showOptions" />
             </div>
           </div>
@@ -26,7 +26,6 @@
   
   <script>
   import router from '@/router';
-  import { inject } from 'vue';
   import LogoImage from "@/assets/logo.png";
   import OptionsOfGuideBar from './OptionsOfGuideBar.vue';
   
@@ -42,9 +41,20 @@
       }
     },
     setup() {
-      const userID = inject("userID");
+      let UserID = 0;
+      try {
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) {
+              const user = JSON.parse(storedUser);
+              UserID = user.UID;
+          }
+      } catch {
+          alert("获取本地个人信息失败");
+      }
+      const UserAvater=`http://localhost:8082/avatars/${UserID}.jpg`;
       return {
-        userID,
+        userID:UserID,
+        UserAvater
       };
     },
     methods: {
@@ -106,6 +116,7 @@
   .userImg {
     margin-left: 30px;
     height: 50px;
+    border-radius: 50%; /* 设置为圆形 */
   }
   
   button {

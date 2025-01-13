@@ -43,8 +43,9 @@
 </template>
 
 <script>
-import GuideBar from '../components/GuideBar.vue';
+import TopBar from '../components/TopBar.vue';
 import InformationBox from '../components/InformationBox.vue';
+import GuideBar from '@/components/GuideBar.vue';
 
 export default {
     name: 'HomePage',
