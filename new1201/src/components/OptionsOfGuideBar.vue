@@ -43,6 +43,7 @@ import router from '@/router';
     flex-direction: column;
     padding: 8px;
     width: 100px;
+    z-index: 998;
   }
   
   .option {

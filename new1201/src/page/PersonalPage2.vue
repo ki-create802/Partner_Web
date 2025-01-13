@@ -65,8 +65,8 @@ export default {
     position: absolute;     /* 使用绝对定位 */
     top: 130px;                 /* 定位到顶部 */
     left: 0;                /* 从左边开始 */
-    width: 100vw;           /* 占满全屏宽度 */
-    height: 38%;           
+    width: 100%;           /* 占满全屏宽度 */
+    height: 32%;           
     background-image: url('../assets/person_background.jpg');  
     background-size: cover;  /* 背景图自动适应尺寸 */
     background-position: center center;  /* 背景图居中 */
@@ -74,21 +74,17 @@ export default {
     background-size: cover;  /* 背景图自动适应尺寸 */
     background-position: center center;  /* 背景图居中 */
     background-repeat: no-repeat;  /* 不重复背景图 */
-    z-index: -1;             /* 确保背景图位于所有内容的下方 */        
-}
-.topbar {
-    width: 100vw;
+    z-index: 0;                  
 }
 .more-info {
-    /* position: absolute; */
     display: flex;
     gap: 30px;
     background-color: #f1f2f3;
-    width: 100vw;
 }
 .user-info {
-    width: 100vw;
     margin-top: 90px;
+    z-index: 1;
+    position: relative;
 }
 .achievement {
     height: 700px;
