@@ -1,26 +1,30 @@
 <template>
   <GuideBar />
-  <div class="chat-container">
-    <ChatList 
-      @chat-selected="onChatSelected" 
-      @search-chats="getChatsList_"
-      :chats="chats"
-    />
-    <ChatArea v-if="selectedChat"
-      @set-dissolve="changeRoomStatus()" 
-      @send-message="handleSendMessage"
-      @get-chat-member="getchatMember_"
-      @add-member="addMember_"
-      @get-room-member="getRoomMember_"
-      @remove-member="removeMember"
-      :chatMembers="chatMember" 
-      :roomMembers="roomMember" 
-      :selectedChat="selectedChat" 
-      :messages="messages" 
-      :isSecret="isSecret"  
-      :chats="chats"
-      :isRoomOwner="selectedChat.ownerId==uid"
-    />
+  <div class="page-container">
+    <div class="chat-container">
+      <ChatList 
+        @chat-selected="onChatSelected" 
+        @search-chats="getChatsList_"
+        :chats="chats"
+      />
+      <ChatArea v-if="selectedChat"
+        @set-dissolve="changeRoomStatus" 
+        @send-message="handleSendMessage"
+        @get-chat-member="getchatMember_"
+        @add-member="addMember_"
+        @get-room-member="getRoomMember_"
+        @remove-member="removeMember"
+        :chatMembers="chatMember" 
+        :roomMembers="roomMember" 
+        :selectedChat="selectedChat" 
+        :messages="messages" 
+        :isSecret="isSecret"  
+        :chats="chats"
+        @getout-room="getoutOfRoom_"
+        :isRoomOwner="selectedChat.ownerId==uid"
+      />
+    </div>
+
   </div>
 </template>
 
@@ -28,7 +32,7 @@
 import ChatList from '../components/ChatList.vue';
 import ChatArea from '../components/ChatArea.vue';
 import GuideBar from '../components/GuideBar.vue';
-import {getChatsList,getChatMessages,removeMember,getRoomMember,addMember,getChatMember,dissolveRoom,sendMessage} from '../api';
+import {getChatsList,getChatMessages,removeMember,getRoomMember,addMember,getChatMember,dissolveRoom,sendMessage, getoutOfRoom} from '../api';
 
 export default {
 name: 'ChatPage',
@@ -39,7 +43,7 @@ components: {
 },
 data() {
   return {
-    uid: null,
+    uid: 0,
     userImg: '',
     username: '',
     chats: [],          //聊天列表
@@ -70,6 +74,22 @@ created() {
   }
 },
 methods: {
+  //退出房间
+  async getoutOfRoom_(){
+    try{
+      let ok=false;
+      ok=await getoutOfRoom(this.uid,this.selectedChat.id);
+      if(!ok)alert("退出房间失败");
+      else{
+        this.selectedChat=null;
+        this.getChatsList_();
+      }
+    }catch(error){
+      console.log("退出房间失败：",error);
+      alert("退出房间失败");
+    }
+    
+  },
   //将项目成员移除
   async removeMember(id){
     try {
@@ -152,6 +172,7 @@ methods: {
     try {
       // 获取历史聊天信息
       const data=await getChatMessages(chatInfo.id,0);
+      alert("选中聊天："+JSON.stringify(this.selectedChat));
       this.messages=data;
       // 开启长轮询
       this.startPolling();
@@ -169,8 +190,7 @@ methods: {
       senderAvatarSrc: this.userImg,
       isImage: false,
       imageSrc: ''
-  };
-
+    };
     // 发送新消息请求到后端
     try{
       let ok=false;
@@ -182,7 +202,7 @@ methods: {
       alert("发送消息失败！");
     }
   },
-  // 开启长轮询
+  // 开启轮询
     startPolling() {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
@@ -199,30 +219,44 @@ methods: {
       } catch (error) {
         console.error('Error polling for new messages:', error);
       }
-    }, 1000); // 每1秒轮询一次 
+  }, 1000); // 每1秒轮询一次 
   },
-  // 停止长轮询
+  // 停止轮询
   stopPolling() {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
       this.pollingInterval = null;
     }
+  },
+  },
+  beforeUnmount() {
+    this.stopPolling(); // 组件销毁前停止长轮询
   }
-},
-beforeUnmount() {
-  this.stopPolling(); // 组件销毁前停止长轮询
-}
 };
 </script>
 
 <style scoped>
-.chat-container {
-  max-width: 1200px;
+.page-container {
   display: flex;
+  position: relative;
+  min-height: 100vh; /* 确保页面高度占满整个视口 */
+  background-image: url('@/assets/聊天页背景.png'); /* 背景图路径 */
+  background-position: bottom; /* 背景图定位在底部 */
+  background-size: cover; /* 背景图覆盖整个区域 */
+  background-repeat: no-repeat; /* 不重复背景图 */
+  margin-top: 0; /* 移除上边距 */
+  padding-top: 0; /* 移除上内边距 */
+}
+
+.chat-container {
+  display: flex;
+  gap: 10px; /* 设置左右两部分之间的间距 */
+  max-width: 1200px;
   width: 80%;
   margin: 0 auto;
-  border: 1px solid #ccc;
+  border: 0px solid #ffc0c0;
+  border-radius: 20px;
   height: 800px;
-  margin: 140px auto 100px; 
+  margin: 140px auto 100px;
 }
 </style>

@@ -56,7 +56,7 @@ export default {
 }
 
 .message-content {
-  background-color: rgb(204, 252, 252);
+  background-color: rgb(255, 230, 235);
   border-radius: 10%;
   text-align: left; /* 确保消息内容靠左显示 */
   margin-right: 20px; 

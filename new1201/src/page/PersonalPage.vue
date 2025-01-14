@@ -9,10 +9,7 @@
     <div class="background-layer"></div>
     <div class="more-info">
         <div class="achievement">
-            <div class="medal1">
-                <img src="../assets/medal1.png" class="img_m1" />
-                <span class="m1"></span>
-            </div>
+            
         </div>
         <div class="tabWidget">
             <div class="tabs">
@@ -41,8 +38,10 @@
                 </div>
                 <!-- 历史内容 -->
                 <div v-if="currentTab === 'history'" class="his-content">
-                    
-                    <FindListItem />
+                    <FindListItem 
+                        v-for="(chat,index) in historyChats" 
+                        :key="index" 
+                        :item="chat" />
                 </div>
             </div>
         </div>
@@ -79,17 +78,13 @@ export default {
             try {
                 const user = JSON.parse(localStorage.getItem('user'));
                 const userID = user.UID;
-                console.log(userID);
+                // console.log(userID);
                 const response = await axios.post(`http://localhost:8082/chat/getPendingChats`, {
                     userID: userID
                 });
                 alert("接收到的response"+JSON.stringify(response));
                 this.pendingChats=response.data.data.pendingChats;
                 alert("接收到的9999:"+JSON.stringify(this.pendingChats));
-                // this.pendingChats = response.data.data.pendingChats.map(chat => ({
-                //     ...chat,
-                //     memberList: chat.memberList || [] // 处理空的 memberList
-                // }));
             } catch (err) {
                 this.error = '获取等搭中聊天室失败，请重试';
                 console.error(err);
@@ -103,15 +98,11 @@ export default {
             try {
                 const user = JSON.parse(localStorage.getItem('user'));
                 const userID = user.UID;
-                console.log(userID);
                 const response = await axios.post(`http://localhost:8082/chat/getHistoryChats`, {
                     userID: userID
                 });
-                alert("接收到的消息："+JSON.stringify(response.data.data.pendingchats));
-                this.historyChats = response.data.data.historyChats.map(chat => ({
-                    ...chat,
-                    memberList: chat.memberList || [] // 处理空的 memberList
-                }));
+                alert("接收到的消息："+JSON.stringify(response.data.data.historyChats));
+                this.historyChats=response.data.data.historyChats;
             } catch (err) {
                 this.error = '获取历史聊天室失败，请重试';
                 console.error(err);
@@ -152,10 +143,10 @@ export default {
     z-index: 0;                   
 }
 .more-info {
-    margin-top: 8%;
+    /* margin-top: 1%; */
     display: flex;
     gap: 30px;
-    background-color: #f1f2f3;
+    background-color: rgba(252, 238, 118, 0.1);
 }
 .user-info {
     margin-top: 11.5%;
@@ -163,10 +154,12 @@ export default {
     position: relative;
 }
 .achievement {
-    height: 700px;
-    width: 320px;
-    background: white;
-    margin-top: 15px;
+    height: 720px;
+    width: 19%;
+    background-image: url('../assets/medal_background.png');
+    background-size: cover;
+    background-position: center center;
+    margin-top: 40px;
     margin-left: 50px;
 }
 .medal1 {
@@ -180,6 +173,8 @@ export default {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     padding: 15px;
     margin-left: 35px;
+    margin-top: 20px;
+    width: 70%;
 }
 .tabs {
     display: flex;
@@ -194,23 +189,21 @@ export default {
     transition: background-color 0.3s;
 }
 .tabs button.active {
-    background-color: #007bff;
+    background-color: #43baf597;
     color: white;
 }
 .tab-content {
-    width: 1300px;
-    height: 650px;
+    width: 100%;
+    height: 1050px;
     border: 1px solid #f1f2f3;
-    background-color: white;
+    background-color: rgba(238, 179, 179, 0.407);
 }
 .wait-content {
     padding: 10px;
     margin: 10px;
-    background: #d2030398;
 }
 .his-content {
     padding: 10px;
-    margin: 10px;
-    background: #d2030398;
+    margin: 5px;
 }
 </style>

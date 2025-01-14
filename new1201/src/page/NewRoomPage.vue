@@ -169,7 +169,7 @@ export default{
         /* max-width: 600px; */
         width:50vw;
         /* height: 50vh; */
-        margin: 50px auto;
+        margin: 100px auto;
         padding: 40px;
         border: 1px solid #ddd;
         border-radius: 8px;

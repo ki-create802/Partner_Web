@@ -43,6 +43,8 @@ type InUserController interface {
 	ResetPassword(c *gin.Context) //重置密码
 	EditPassword(c *gin.Context)  //修改密码
 
+	IsFollow(c *gin.Context)     //是否关注
+	CancelFollow(c *gin.Context) //取消关注
 }
 
 func NewUserController() InUserController {
@@ -687,4 +689,65 @@ func (a UserController) EditPassword(c *gin.Context) {
 	}
 
 	common.Success(c, nil, "密码更新成功")
+}
+
+// 是否关注当前用户
+func (a UserController) IsFollow(c *gin.Context) {
+	var requestUser model.Gz
+	if err := c.Bind(&requestUser); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	gzid := requestUser.Gzid
+	bgzid := requestUser.Bgzid
+
+	// 判断 gzid 和 bgzid 是否为 0
+	if gzid == 0 || bgzid == 0 {
+		common.Fail(c, 400, nil, "输入Gzid或Bgzid为零或为字符串")
+		return
+	}
+
+	// 查询 gz_match 表中是否存在该关注关系
+	var count int64
+	a.DB.Table("gzmatch").Debug().Where("gz_id = ? AND bgz_id = ?", gzid, bgzid).Count(&count)
+
+	// 返回结果
+	if count > 0 {
+		common.Success(c, gin.H{"is_follow": true}, "已关注")
+	} else {
+		common.Success(c, gin.H{"is_follow": false}, "未关注")
+	}
+}
+
+// 取消关注当前用户
+func (a UserController) CancelFollow(c *gin.Context) {
+	var requestUser model.Gz
+	if err := c.Bind(&requestUser); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	gzid := requestUser.Gzid
+	bgzid := requestUser.Bgzid
+
+	// 判断 gzid 和 bgzid 是否为 0
+	if gzid == 0 || bgzid == 0 {
+		common.Fail(c, 400, nil, "输入Gzid或Bgzid为零或为字符串")
+		return
+	}
+
+	// 删除 gz_match 表中的关注关系
+	result := a.DB.Table("gzmatch").Where("gz_id = ? AND bgz_id = ?", gzid, bgzid).Delete(&model.Gz{})
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "取消关注失败")
+		return
+	}
+
+	// 判断是否成功删除
+	if result.RowsAffected > 0 {
+		common.Success(c, nil, "取消关注成功")
+	} else {
+		common.Fail(c, 404, nil, "未找到关注关系")
+	}
 }

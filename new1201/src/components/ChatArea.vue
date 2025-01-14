@@ -1,19 +1,19 @@
-<!-- 聊天室界面 组件-->
 <template>
   <div class="chat-area">
     <div class="part1">
       <h2>{{ selectedChat.name }}</h2>
+      <p>{{ selectedChat.remark }}</p>
       <div class="roomInfo">
         <div class="left">
         </div>
         <div class="right">
-          <button class="addMemberButton" @click="showPopup('addMember')" ></button>
+          <button v-if="isRoomOwner" class="addMemberButton" @click="showPopup('addMember')"></button>
           <button class="setButton" @click="showPopup('settings')"></button>
           <button class="memberButton" @click="showPopup('members')"></button>
         </div>
       </div>
     </div>
-    <div class="messages">
+    <div ref="messagesContainer" class="messages">
       <AMessage v-for="message in messages" :key="message.id" :message="message" :is-current-user="message.UID === uid"/>
     </div>
     <div class="input-area">
@@ -22,45 +22,40 @@
     </div>
 
     <!-- 弹出窗口 -->
-    <PopupWindow v-if="isPopupVisible" @close="closePopup">
+    <PopupWindow v-if="isPopupVisible" @close="closePopup" class="popup-window">
       <div v-if="popupType === 'addMember'">
-        <h3>添加成员</h3>
-        <!-- 添加成员的表单或内容 -->
+        <p class="title">添加成员</p>
         <div class="mylist">
-        <ul>
-          <li v-for="chatmember in chatMembers" :key='chatmember.id' >
-            <div class="addMemberList">
-              <div class="addmemberInfo">
-                <img class="avatar" :src="`http://localhost:8082/avatars/${chatmember.userID}.jpg`">
-                成员名{{ chatmember.userName }}
+          <ul>
+            <li v-for="chatmember in chatMembers" :key="chatmember.id">
+              <div class="addMemberList">
+                <div class="addmemberInfo">
+                  <img class="avatar" :src="`http://localhost:8082/avatars/${chatmember.userID}.jpg`">
+                  成员名{{ chatmember.userName }}
+                </div>
+                <button class="list-button" @click="addMember(chatmember.userID)">添加</button>
               </div>
-              <button @click="addMember(chatmember.userID)">添加</button>
-            </div>
-          </li>
-        </ul>
-      </div>
-
+            </li>
+          </ul>
+        </div>
       </div>
       <div v-else-if="popupType === 'settings'">
-        <h3>设置</h3>
-        <!-- 设置的表单或内容 -->
-         <div class="setting">
-          <button @click="dissolveRoom">解散房间</button>
-         </div>
+        <p class="title">设置</p>
+        <div class="setting">
+          <button v-if="!isRoomOwner" @click="getOutRoom_">退出房间</button>
+          <button v-if="isRoomOwner" @click="dissolveRoom">解散房间</button>
+        </div>
       </div>
-
-
       <div v-else-if="popupType === 'members'">
-        <h3>成员列表</h3>
-        <!-- 成员列表的表单或内容 -->
+        <p class="title">成员列表</p>
         <ul>
-          <li v-for="roomMember in roomMembers" :key='roomMember.id' >
+          <li v-for="roomMember in roomMembers" :key="roomMember.id">
             <div class="roomMemberList">
               <div class="roomMemberInfo">
                 <img class="avatar" :src="`http://localhost:8082/avatars/${roomMember.userID}.jpg`">
                 {{ roomMember.userName }}
               </div>
-              <button v-if="isRoomOwner" @click="removeMember(roomMember.userID)">删除</button>
+              <button class="list-button" v-if="isRoomOwner" @click="removeMember(roomMember.userID)">删除</button>
             </div>
           </li>
         </ul>
@@ -91,7 +86,6 @@ export default {
       type:Boolean,
       required:true,
     },
-    //会话成员列表每一项为{userid,avatar}
     chatMembers:{
       type: Array,
     },
@@ -111,7 +105,26 @@ export default {
       popupType: '',
     };
   },
+  mounted() {
+    this.scrollToBottom();
+  },
+  updated() {
+    this.scrollToBottom();
+  },
+  watch: {
+    messages() {
+      this.$nextTick(() => {
+        this.scrollToBottom();
+      });
+    },
+  },
   methods: {
+    scrollToBottom() {
+      const container = this.$refs.messagesContainer;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    },
     removeMember(id){
       this.$emit('remove-member',id)
     },
@@ -133,7 +146,7 @@ export default {
     dissolveRoom(){
       this.$emit('set-dissolve');
     },
-    range(n) {//一个无用函数，用于调试
+    range(n) {
       return Array.from({ length: n }, (_, i) => i + 1);
     },
     sendMessage() {
@@ -150,9 +163,11 @@ export default {
     closePopup() {
       this.isPopupVisible = false;
     },
+    getOutRoom_(){
+      this.$emit('getout-room');
+    }
   },
   created() {
-    // 从本地存储中获取用户信息
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       const user = JSON.parse(storedUser);
@@ -163,119 +178,202 @@ export default {
 </script>
 
 <style scoped>
+/* 整体布局 */
 .chat-area {
   flex: 1;
-  padding: 10px;
+  padding: 20px;
+  background-color: #f9f9f97e;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 .part1 {
   height: 15%;
+  margin-bottom: 20px;
 }
+
 .roomInfo {
   width: 100%;
   display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
 }
-.left {
-  align-items: start;
-}
+
 .right {
-  width: 50%;
-  display: flex; /* 确保使用 Flexbox 布局 */
-  justify-content: flex-end; /* 将子元素推到容器的末尾 */
-  align-items: center; /* 垂直居中对齐 */
-  white-space: nowrap; /* 防止内容换行 */
+  display: flex;
+  gap: 10px;
 }
+
 .right button {
   width: 40px;
   height: 40px;
-  box-shadow: #ccc;
+  border: none;
+  border-radius: 20%;
+  background-color: #ffffff00;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.right button:hover {
+  background-color: hsla(0, 0%, 100%, 0.754);
 }
 .right .setButton {
-  background-image: url('@/assets/齿轮.jpg');
+  background-image: url('@/assets/齿轮.png');
   background-size: cover;
 }
 .right .addMemberButton {
-  background-image: url('@/assets/加号.jpg');
+  background-image: url('@/assets/加号.png');
   background-size: cover;
 }
 .right .memberButton {
-  background-image: url('@/assets/成员.jpg');
+  background-image: url('@/assets/成员.png');
   background-size: cover;
 }
-.memberAvatar {
-  width: 50%;
-  display: flex; /* 使用 Flexbox 布局 */
-  overflow-x: auto; /* 启用横向滚动条 */
-  white-space: nowrap; /* 防止内容换行 */
-}
-/* 自定义滚动条样式 */
-.memberAvatar::-webkit-scrollbar {
-  height: 6px; /* 滚动条宽度 */
-}
 
-.memberAvatar::-webkit-scrollbar-track {
-  background: #f1f1f1; /* 滚动条轨道背景色 */
-}
-
-.memberAvatar::-webkit-scrollbar-thumb {
-  background: #e3e3e3; /* 滚动条滑块颜色 */
-  border-radius: 4px; /* 滚动条滑块圆角 */
-}
-.avatar {
-  width: 40px; /* 设置图像的宽度 */
-  min-width: 40px;
-  height: 40px; /* 设置图像的高度 */
-  border-radius: 50%; /* 使图像显示为圆形 */
-  vertical-align: middle; /* 使图像垂直居中 */
-}
+/* 消息区域 */
 .messages {
   height: 72%;
   overflow-y: auto;
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
+  background-color: rgba(255, 255, 255, 0.575);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* 自定义滚动条样式 */
+.messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background: #ff9191;
+  border-radius: 4px;
+}
+
+.messages::-webkit-scrollbar-thumb:hover {
+  background: #ff6b6b;
+}
+
+/* 输入区域 */
 .input-area {
+  background-color: #ffffff00;
   display: flex;
+  gap: 10px;
 }
 
 input {
-  height: 13%;
-  background-color: rgb(224, 244, 255);
-  border: none;
-  border-radius: 4px;
-  height: 40px;
   flex: 1;
-  padding: 5px;
-  font-size: 18px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: rgba(255, 255, 255, 0.526);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 button {
-  width: 60px;
-  background-color: rgb(103, 150, 211);
+  padding: 10px 20px;
   border: none;
-  border-radius: 4px;
-  padding: 5px 10px;
-  font-size: 18px;
+  border-radius: 8px;
+  background-color: #ff9191;
   color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: rgb(47, 94, 157);
+  background-color: #ff6b6b;
 }
-.setting{
+
+/* 弹出窗口 */
+.popup-window {
+  background-color: rgba(255, 255, 255, 0.412);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff6b6b;
+  margin-bottom: 20px;
+}
+
+.mylist ul, .members ul {
+  list-style: none;
+  padding: 0;
+}
+
+.addMemberList, .roomMemberList {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.addmemberInfo, .roomMemberInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.list-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ff9191;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.list-button:hover {
+  background-color: #ff6b6b;
+}
+
+/* 设置区域 */
+.setting {
   display: flex;
   flex-direction: column;
-  gap:10px
+  gap: 10px;
 }
-.setting button{
+
+.setting button {
   width: 100%;
-  background-color: #b9b9b9;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ff9191;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
-.setting button:hover{
-  background-color: #757575;
+
+.setting button:hover {
+  background-color: #ff6b6b;
 }
+
+.mylist, ul {
+  list-style: none; /* 移除列表项前的标记 */
+  padding-left: 0; /* 可选：移除默认的左内边距 */
+}
+
 </style>

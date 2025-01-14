@@ -82,13 +82,15 @@
   
   <style scoped>
   .mybackground {
-    background: linear-gradient(to bottom, rgb(9, 100, 175), rgba(255, 255, 255, 0));
-    padding: 20px;
+    background: linear-gradient(to bottom, rgba(134, 194, 136, 0), rgba(255, 255, 255, 0));
+    /*padding: 0px;*/
     position: fixed;
     top: 0; /* 距离顶部为 0 */
     left: 0; /* 距离左侧为 0 */
     width: 100%; /* 宽度占满整个页面 */
     z-index: 1000; /* 确保 GuideBar 在最上层 */
+    margin-bottom: 0; /* 移除下边距 */
+    padding-bottom: 0; /* 移除下内边距 */
   }
   
   .searchbody {
@@ -96,7 +98,7 @@
     display: flex;
     justify-content: space-between; /* 子元素之间的间距 */
     align-items: center; /* 子元素垂直居中 */
-    background-color: #f2f6fc;
+    background-color: #ffffffd3;
     border-radius: 50px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }

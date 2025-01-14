@@ -18,15 +18,15 @@ type ChatSearch struct { //只用于搜索
 }
 
 type Room struct {
-	Cid         int       `gorm:"column:cid;primaryKey;autoIncrement"`                          //房间ID自增长不用传
-	Name        string    `gorm:"column:cname;type:varchar(45);not null" json:"Name"`           //房名 要给
-	Bid         int       `gorm:"column:bid;not null" json:"Bid"`                               //版块ID 要给
-	Uid         int       `gorm:"column:uid;not null" json:"Uid"`                               //房主ID 不用给
-	Cnumber     int       `gorm:"column:cnumber;not null" json:"Cnumber"`                       //人数 要给
-	Cstate      int       `gorm:"column:cstate;not null"`                                       //状态默认为1  不用给
-	CYueDate    string    `gorm:"column:c_yue_date;type:varchar(12);not null" json:"CYueDate "` //约的时间 要给
-	CCreateTime time.Time `gorm:"column:c_create_time;type:datetime;not null"`                  //创建时间 不用给
-	Cremark     string    `gorm:"column:cremark;type:text" json:"Cremark"`                      //房间简介 要给
+	Cid         int       `gorm:"column:cid;primaryKey;autoIncrement"`                         //房间ID自增长不用传
+	Name        string    `gorm:"column:cname;type:varchar(45);not null" json:"Name"`          //房名 要给
+	Bid         int       `gorm:"column:bid;not null" json:"Bid"`                              //版块ID 要给
+	Uid         int       `gorm:"column:uid;not null" json:"Uid"`                              //房主ID 不用给
+	Cnumber     int       `gorm:"column:cnumber;not null" json:"Cnumber"`                      //人数 要给
+	Cstate      int       `gorm:"column:cstate;not null"`                                      //状态默认为1  不用给
+	CYueDate    string    `gorm:"column:c_yue_date;type:varchar(12);not null" json:"CYueDate"` //约的时间 要给
+	CCreateTime time.Time `gorm:"column:c_create_time;type:datetime;not null"`                 //创建时间 不用给
+	Cremark     string    `gorm:"column:cremark;type:text" json:"Cremark"`                     //房间简介 要给
 }
 
 type Member struct {

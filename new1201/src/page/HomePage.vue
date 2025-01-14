@@ -6,7 +6,7 @@
       <CarouselImage :images="images" class="CarouselImage"/>
     </div> -->
     <!-- 一个图片 -->
-    <img src="@/assets/image.png"  class="topimg" />
+    <img src="@/assets/image4.jpg"  class="topimg" />
 
     <div class="lr">
       <div class="left">   
@@ -45,6 +45,7 @@
                 距 <strong>{{ item.content }}</strong> 还有 <strong>{{ getDaysUntil(item.date) }}天</strong><br>
               </div>
             </div>
+            <button class="sign" v-if="showButton" @click="generateFortune();disappear()">点击打卡</button>
             <strong style="display: block; margin-top: 20px;" v-if="showFortune" class="ffortune">{{ fortune }}</strong>
           </div>
         </div>
@@ -74,7 +75,7 @@ export default {
     // CarouselImage,
     SearchBox,
     FindListItem,
-    Module
+    Module,
   },
   data() {
     return {
@@ -174,11 +175,13 @@ export default {
 
     getDaysUntil(targetDateStr) {  //距...行程还有多少天，用于洛谷
       // 将目标日期字符串转换为 Date 对象
-      const targetDate = new Date(targetDateStr.replace(/\./g, "-")); // 将"2024.12.16"转换为"2024-12-16" 
-      // 获取今天的日期
+      const targetDate = new Date(targetDateStr.replace(/\./g, "-")); 
+      // 获取今天的日期 
       const today = new Date();
       // 计算日期差异（以毫秒为单位）
       const timeDifference = targetDate - today;
+      //alert("日期差="+JSON.stringify(targetDateStr)+" - "+JSON.stringify(today));
+      //alert("日期差："+JSON.stringify(timeDifference));
       // 将毫秒转换为天数
       const daysLeft = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
       return daysLeft;
@@ -189,7 +192,7 @@ export default {
       const user = JSON.parse(localStorage.getItem('user'));
       if (user) {
         console.log(222);
-        this.username = user.UID;  // 如果存在，则赋值
+        this.username = user.UName;  // 如果存在，则赋值
         console.log(this.username)
       } else {
         console.log(333);
@@ -263,8 +266,16 @@ export default {
 }
 
 .sign{
-  background-color: #5ba4f6;
+  background-color: #9cc5f5;
   margin-top: 20px;
+  border-radius: 10px; /* 圆角 */
+  border: none; /* 去掉默认边框 */
+  padding: 10px 20px; /* 内边距 */
+  font-size: 1em; /* 字体大小 */
+  font-weight: 900; /* 字体粗细 */
+  color: rgb(255, 255, 255); /* 字体颜色 */
+  cursor: pointer; /* 鼠标悬停时显示手型 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影 */
 }
 
 .ffortune{
@@ -320,7 +331,7 @@ export default {
 }
 
 .hotitem{
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .hotlist {

@@ -23,7 +23,11 @@
     </div>
     <div v-else>
       <div v-if="searchResults.length > 0" class="searchResults">
-        <FindListItem v-for="(result, index) in searchResults" :key="index" :item="result" />
+        <div class="hot">
+          <div class="hotlist">
+            <FindListItem v-for="(result, index) in searchResults" :key="index" :item="result" class="hotitem" />
+          </div>
+        </div>
       </div>
       <div v-else class="noResults">
         <p>没有找到相关结果</p>
@@ -138,5 +142,30 @@ export default {
   background-color: #bccfff;
   color: #ffffff;
   cursor: not-allowed;
+}
+
+/* 新增样式，与 HomePage 的 .hot 和 .hotlist 一致 */
+.hot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 20px;
+  width: 70%; /* 宽度设置为 80% */
+  margin: 0 auto; /* 水平居中 */
+}
+
+.hotlist {
+  width: 100%;
+}
+
+.hotitem {
+  margin-bottom: 20px;
+}
+
+.noResults {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 1.2em;
+  color: #666;
 }
 </style>
