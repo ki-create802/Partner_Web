@@ -404,6 +404,8 @@ func (b ChatController) CreateChat(c *gin.Context) { //创建聊天室 版块传
 		return
 	}
 
+	fmt.Println("传入的消息111111", requestChat)
+
 	// 检查必要字段
 	if requestChat.Bid == 0 || requestChat.Name == "" || requestChat.Uid == 0 {
 		common.Fail(c, 400, nil, "版块ID、聊天室名称或用户ID不能为空")
@@ -412,6 +414,9 @@ func (b ChatController) CreateChat(c *gin.Context) { //创建聊天室 版块传
 	}
 
 	currentTime := time.Now() //获取当前时间
+
+	fmt.Println("111111", requestChat.CYueDate)
+	fmt.Println("日期111111", requestChat.CYueDate)
 
 	newChat := model.Room{
 		Name:        requestChat.Name,
@@ -571,16 +576,18 @@ func (b ChatController) ChatLists(c *gin.Context) {
 
 	// 构造返回数据
 	type Response struct {
-		CID   uint   `json:"id"`
-		UID   uint   `json:"ownerId"`
-		CName string `json:"name"`
+		CID     uint   `json:"id"`
+		UID     uint   `json:"ownerId"`
+		CName   string `json:"name"`
+		CRemark string `json:"remark"`
 	}
 	var responses []Response
 	for _, chatInfo := range chatInfos {
 		responses = append(responses, Response{
-			CID:   chatInfo.CID,
-			UID:   chatInfo.UID,
-			CName: chatInfo.CName,
+			CID:     chatInfo.CID,
+			UID:     chatInfo.UID,
+			CName:   chatInfo.CName,
+			CRemark: chatInfo.CRemark,
 		})
 	}
 	// 返回结果

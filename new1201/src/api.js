@@ -252,7 +252,6 @@ export const getFansNum = async () => {
     const response = await axios.post(`${API_BASE_URL}/user/fansNum`, {
       userID
     });
-    alert("后端粉丝数"+JSON.stringify(response.data.data));
     return response.data.data.fansNum;
   } catch (error) {
     console.error('Error logging in:', error);
@@ -268,7 +267,7 @@ export const signUp = async (username,email, password) => {
       Email: email,
       Password: password,
     });
-    if(response.data.code==200)return true;
+    if(response.data && response.data.code==200)return true;
     else return false;
   } catch (error) {
     console.error('Error signing up:', error);
@@ -289,6 +288,7 @@ export const api_ScheduleItems = async (uid) => {
     const response = await axios.post(`${API_BASE_URL}/user/schedule`, {
       userID: uid ,
     });
+    //alert("后端获取行程信息："+JSON.stringify(response.data.data.ScheduleList));
     return response.data.data.ScheduleList;
   } catch (error) {
     // console.error('Error fetching schedule items:', error);
@@ -310,6 +310,16 @@ export const changeRoomStatus = async (roomId, status) => {
   }
 };
 
+/**
+ * 创建新房间
+ *  {string} roomName - 房间名称
+ *  {number} typeID - 房间类型ID
+ *  {number} Uid - 用户ID
+ *  {number} memberNum - 房间人数
+ *  {string} dateTime - 预约时间
+ *  {string} remark - 备注
+ * return {boolean} - 是否创建成功
+ */
 // 新建房间
 export const newRoom = async (roomName, typeID,Uid,memberNum,dateTime,remark) => {
   try {
@@ -412,7 +422,6 @@ export const editPW = async (uid,newPW) => {
 
 //修改昵称请求
 export const editNewName = async (uid,newName) => {
-  alert("修改昵称请求："+uid+":"+newName);
   try {
     const response = await axios.post(`${API_BASE_URL}/user/editInfo`, {
       UID:uid,
@@ -428,7 +437,6 @@ export const editNewName = async (uid,newName) => {
 
 // 上传头像请求
 export const uploadAvatar = async (uid, file) => {
-  alert("上传头像请求：" + uid + "，文件名：" + file.name);
   try {
     // 创建 FormData 对象
     const formData = new FormData();
@@ -447,6 +455,21 @@ export const uploadAvatar = async (uid, file) => {
     else return false;
   } catch (error) {
     console.error("上传头像失败", error);
+    throw error;
+  }
+};
+
+//退出房间
+export const getoutOfRoom = async (uid,cid) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/??`, {
+      UID:uid,
+      Cid:cid
+    });
+    if(response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    console.error('退出房间失败：', error);
     throw error;
   }
 };

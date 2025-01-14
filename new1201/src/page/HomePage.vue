@@ -174,11 +174,13 @@ export default {
 
     getDaysUntil(targetDateStr) {  //距...行程还有多少天，用于洛谷
       // 将目标日期字符串转换为 Date 对象
-      const targetDate = new Date(targetDateStr.replace(/\./g, "-")); // 将"2024.12.16"转换为"2024-12-16" 
-      // 获取今天的日期
+      const targetDate = new Date(targetDateStr.replace(/\./g, "-")); 
+      // 获取今天的日期 
       const today = new Date();
       // 计算日期差异（以毫秒为单位）
       const timeDifference = targetDate - today;
+      //alert("日期差="+JSON.stringify(targetDateStr)+" - "+JSON.stringify(today));
+      //alert("日期差："+JSON.stringify(timeDifference));
       // 将毫秒转换为天数
       const daysLeft = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
       return daysLeft;
@@ -189,7 +191,7 @@ export default {
       const user = JSON.parse(localStorage.getItem('user'));
       if (user) {
         console.log(222);
-        this.username = user.UID;  // 如果存在，则赋值
+        this.username = user.UName;  // 如果存在，则赋值
         console.log(this.username)
       } else {
         console.log(333);

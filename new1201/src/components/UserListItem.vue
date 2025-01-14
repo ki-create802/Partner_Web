@@ -2,8 +2,8 @@
     <div class="userItem">
       <img class="userImage" :src="`http://localhost:8082/avatars/${user.UID}.jpg`" alt="User Image" />
       <div class="userInfo">
-        <a class="userName">{{ user.UName }}</a>
-        <a class="userRemark">个性签名：{{ user.URemark }}</a>
+        <p class="userName">{{ user.UName }}</p>
+        <p class="userRemark">个性签名：{{ user.URemark }}</p>
       </div>
     </div>
   </template>
@@ -18,9 +18,9 @@
       },
     },
   }
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   .userItem {
     display: flex;
     align-items: center;
@@ -52,10 +52,12 @@
     font-weight: bold;
     color: #333333;
     margin-bottom: 5px;
+    text-align: left;
   }
   
   .userRemark {
     font-size: 14px;
     color: #666666;
+    text-align: left;
   }
   </style>

@@ -23,7 +23,7 @@
     </div>
     <div v-else>
       <div v-if="searchResults.length > 0" class="searchResults">
-        <FindListItem v-for="(result, index) in searchResults" :key="index" :item="result" />
+        <FindListItem class="find-list-item" v-for="(result, index) in searchResults" :key="index" :item="result" />
       </div>
       <div v-else class="noResults">
         <p>没有找到相关结果</p>
@@ -138,5 +138,14 @@ export default {
   background-color: #bccfff;
   color: #ffffff;
   cursor: not-allowed;
+}
+
+.searchResults, .noResults {
+  max-width: 90%; /* 限制宽度为页面宽度的 70% */
+  margin: 0 auto; /* 水平居中 */
+}
+
+.searchResults .find-list-item {
+  margin-bottom: 20px; /* 调整间距大小 */
 }
 </style>

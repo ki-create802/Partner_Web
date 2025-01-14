@@ -2,7 +2,7 @@
   "databaseConfig": {
     "driverName": "mysql",
     "user": "root",
-    "password": "123456",
+    "password": "root",
     "host": "localhost",
     "port": "3306",
     "database": "partner",
