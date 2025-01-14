@@ -394,6 +394,55 @@ export const joinChat = async (cid,uid) => {
     throw error;
   }
 };
+
+
+//返回个人信息请求
+export const otherInform = async (uid) => {
+  //alert("22222:  "+JSON.stringify(uid));
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/info`, {
+      userID:Number(uid)
+    });
+    //alert("1111:  "+JSON.stringify(response));
+    if(response.data.code==200)return response.data.data.user;
+    else return false;
+  } catch (error) {
+    console.error('Error signing up:', error);
+    throw error;
+  }
+};
+
+//返回粉丝数
+export const fansss = async (uid) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/fansNum`, {
+      userID:Number(uid)
+    });
+    //alert("1111:  "+JSON.stringify(response));
+    if(response.data.code==200)return response.data.data.fansNum;
+    else return false;
+  } catch (error) {
+    console.error('Error signing up:', error);
+    throw error;
+  }
+};
+
+
+//增加粉丝数
+export const followadd = async (uid1,uid2) => {
+  //alert("这里是增加粉丝数");
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/guanzhu`, {
+      Gzid:Number(uid1),
+      Bgzid:Number(uid2)
+    });
+    //alert("2:  "+JSON.stringify(response));
+    if(response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    console.error('Error signing up:', error);
+  }
+}
   
 //修改密码
 export const editPW = async (uid,newPW) => {
@@ -410,6 +459,23 @@ export const editPW = async (uid,newPW) => {
   }
 };
 
+
+//返回是否已关注
+export const whetherfollow = async (uid1,uid2) => {
+  //alert("这里是关注状态");
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/isFollow`, {
+      Gzid:Number(uid1),
+      Bgzid:Number(uid2)
+    });
+    //alert("2:  "+JSON.stringify(response));
+    if(response.data.code==200)return response.data.data.is_follow;
+    else return false;
+  } catch (error) {
+    console.error('Error signing up:', error);
+  }
+}
+
 //修改昵称请求
 export const editNewName = async (uid,newName) => {
   alert("修改昵称请求："+uid+":"+newName);
@@ -425,6 +491,24 @@ export const editNewName = async (uid,newName) => {
     throw error;
   }
 };
+
+export const unfollow = async (uid1,uid2) => {
+  //alert("1111:");
+  //alert("uid1111:"+uid1+"               uid2222:"+uid2);
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/cancelFollow`, {
+      Gzid:Number(uid1),
+      Bgzid:Number(uid2)
+    });
+    //alert("2:  "+JSON.stringify(response));
+    if(response.data.code==200)return true
+    else return false;
+  } catch (error) {
+    console.error('Error signing up:', error);
+    throw error;
+  }
+};
+
 
 // 上传头像请求
 export const uploadAvatar = async (uid, file) => {
