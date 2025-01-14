@@ -102,21 +102,6 @@ export default {
 </script>
 
 <style>
-.background-layer {
-    position: absolute;     /* 使用绝对定位 */
-    /* top: 130px;                定位到顶部 */
-    left: 0;                /* 从左边开始 */
-    width: 100%;           /* 占满全屏宽度 */
-    height: 100%;           
-    background-image: url('../assets/person_background.jpg');  
-    background-size: cover;  /* 背景图自动适应尺寸 */
-    background-position: center center;  /* 背景图居中 */
-    background-repeat: no-repeat;  /* 不重复背景图 */
-    background-size: cover;  /* 背景图自动适应尺寸 */
-    background-position: center center;  /* 背景图居中 */
-    background-repeat: no-repeat;  /* 不重复背景图 */
-    z-index: -1;                   
-}
 .information {
   display: flex;
   padding: 25px;

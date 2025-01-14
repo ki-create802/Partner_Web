@@ -6,7 +6,7 @@
         <InformationBox2 />
     </div>
     <!-- 添加背景图层 -->
-    <!-- <div class="background-layer"></div> -->
+    <div class="background-layer"></div>
     <div class="more-info">
         <div class="achievement">
             <div class="medal1">
@@ -66,7 +66,7 @@ export default {
     top: 130px;                 /* 定位到顶部 */
     left: 0;                /* 从左边开始 */
     width: 100%;           /* 占满全屏宽度 */
-    height: 100%;           
+    height: 32%;           
     background-image: url('../assets/person_background.jpg');  
     background-size: cover;  /* 背景图自动适应尺寸 */
     background-position: center center;  /* 背景图居中 */
@@ -82,7 +82,7 @@ export default {
     background-color: #f1f2f3;
 }
 .user-info {
-    margin-top: 90px;
+    margin-top: 11.5%;
     z-index: 1;
     position: relative;
 }
