@@ -727,7 +727,7 @@ func (b ChatController) SaveChatRecords(c *gin.Context) { //存储聊天记录
 	common.Success(c, gin.H{"record": record}, "成功插入聊天室记录")
 }
 
-func (b ChatController) GetPendingChats(c *gin.Context) { //获取主页'等待中'板块聊天室列表
+func (b ChatController) GetPendingChats(c *gin.Context) { //获取“等待中”聊天室列表
 	var request struct {
 		UserID uint `json:"userID"`
 	}
@@ -774,6 +774,39 @@ func (b ChatController) GetPendingChats(c *gin.Context) { //获取主页'等待�
 	pendingChats = append(pendingChats, successChats...)
 	pendingChats = append(pendingChats, ownerChats...)
 
+	// 填充房主信息和成员列表
+	for i, chat := range pendingChats {
+		// 查询房主信息
+		var roomOwner model.User
+		if err := b.DB.Table("user").Where("uid = ?", chat.Uid).First(&roomOwner).Error; err != nil {
+			common.Fail(c, 500, nil, "查询房主信息失败")
+			return
+		}
+		pendingChats[i].RoomOwnerName = roomOwner.UName
+		pendingChats[i].RoomOwnerImg = roomOwner.UImage
+
+		// 查询成员列表
+		var successMatches []model.SuccessMatch
+		if err := b.DB.Table("success_match").Where("cid = ?", chat.CID).Find(&successMatches).Error; err != nil {
+			common.Fail(c, 500, nil, "查询成员列表失败")
+			return
+		}
+
+		var memberList []model.Member
+		for _, match := range successMatches {
+			var user model.User
+			if err := b.DB.Table("user").Where("uid = ?", match.UID).First(&user).Error; err != nil {
+				common.Fail(c, 500, nil, "查询成员信息失败")
+				return
+			}
+			memberList = append(memberList, model.Member{
+				MemberID:  int(user.UID),
+				MemberImg: user.UImage,
+			})
+		}
+		pendingChats[i].MemberList = memberList
+	}
+
 	common.Success(c, gin.H{"pendingChats": pendingChats}, "成功返回等待中聊天室列表")
 }
 
@@ -811,6 +844,39 @@ func (b ChatController) GetHistoryChats(c *gin.Context) { //获取历史聊天�
 	var historyChats []model.ChatInfo
 	historyChats = append(historyChats, memberChats...)
 	historyChats = append(historyChats, ownerChats...)
+
+	// 填充房主信息和成员列表
+	for i, chat := range historyChats {
+		// 查询房主信息
+		var roomOwner model.User
+		if err := b.DB.Table("user").Where("uid = ?", chat.Uid).First(&roomOwner).Error; err != nil {
+			common.Fail(c, 500, nil, "查询房主信息失败")
+			return
+		}
+		historyChats[i].RoomOwnerName = roomOwner.UName
+		historyChats[i].RoomOwnerImg = roomOwner.UImage
+
+		// 查询成员列表
+		var successMatches []model.SuccessMatch
+		if err := b.DB.Table("success_match").Where("cid = ?", chat.CID).Find(&successMatches).Error; err != nil {
+			common.Fail(c, 500, nil, "查询成员列表失败")
+			return
+		}
+
+		var memberList []model.Member
+		for _, match := range successMatches {
+			var user model.User
+			if err := b.DB.Table("user").Where("uid = ?", match.UID).First(&user).Error; err != nil {
+				common.Fail(c, 500, nil, "查询成员信息失败")
+				return
+			}
+			memberList = append(memberList, model.Member{
+				MemberID:  int(user.UID),
+				MemberImg: user.UImage,
+			})
+		}
+		historyChats[i].MemberList = memberList
+	}
 
 	common.Success(c, gin.H{"historyChats": historyChats}, "成功返回历史聊天室列表")
 }

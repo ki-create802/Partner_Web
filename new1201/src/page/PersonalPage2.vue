@@ -2,11 +2,11 @@
     <div class="topbar">
         <GuideBar />
     </div>
-    <div class="user-info">
-        <InformationBox2 />
+    <div class="user-info" >
+        <InformationBox2 :userInfo="userInfo" :fan="fan" :isFollowed="isFollowed" @follow-success="loadInform"  />
     </div>
     <!-- 添加背景图层 -->
-    <!-- <div class="background-layer"></div> -->
+    <div class="background-layer"></div>
     <div class="more-info">
         <div class="achievement">
             <div class="medal1">
@@ -45,18 +45,92 @@
 <script>
 import GuideBar from '../components/GuideBar.vue';
 import InformationBox2 from '../components/InformationBox2.vue';
+import {otherInform} from "@/api";
+import {fansss} from "@/api";
+import { whetherfollow } from '@/api.js';
+
 
 export default {
     name: 'HomePage',
     data() {
         return {
-            currentTab: 'waiting' // 默认显示“等搭中”
+            currentTab: 'waiting', // 默认显示“等搭中”,
+            userInfo: {
+                UID: '',
+                UName: '',
+                Password: '',
+                Email: '',
+                URemark: '',
+                UImage: ''
+            },
+            fan:null,
+                isFollowed:false, //关注状态
+
         }
     },
+    created() {
+        this.UID = this.$route.query.UID; // 获取传递的 UID
+        console.log('接收到的 UID:', this.UID);
+        // 你可以在这里根据 UID 发起请求，获取用户详细信息
+    },
+    mounted() {
+        this.loadInform(); // 页面加载时调用
+    },
+
     components: {
         GuideBar,
         InformationBox2,
     },
+    methods:{
+        async loadInform(){
+            //请求个人信息
+            try {
+                const response = await otherInform(this.UID);
+                //alert("888")
+                //alert("收到的赋值前response："+JSON.stringify(response))
+                this.userInfo = response;
+                //alert("收到的response："+JSON.stringify(this.userInfo))
+            } catch (error) {
+                console.error('Error loading user information:', error);
+                //alert("请求个人信息失败，请稍后重试！");
+            }
+
+            //请求关注人数
+            try {
+                //alert("fan888")
+                const response = await fansss(this.UID);  //别人
+                //alert("收到的赋值前response："+JSON.stringify(response))
+                this.fan = response;
+                //alert("收到的response："+JSON.stringify(this.fan))
+            } catch (error) {
+                console.error('Error loading user information:', error);
+                alert("请求粉丝信息失败，请稍后重试！");
+            }
+
+            //请求关注状态
+            try {
+                //获取个人id
+                let UserID = 0;
+                try {
+                    const storedUser = localStorage.getItem('user');
+                    if (storedUser) {
+                        const user = JSON.parse(storedUser);
+                        UserID = user.UID;
+                    }
+                } catch {
+                    alert("获取本地个人信息失败");
+                }
+                //alert("开始请求关注状态")
+                const followStatus = await whetherfollow(UserID, this.UID); // 获取关注状态
+                this.isFollowed = followStatus; // 更新关注状态
+                //alert("isFollow:" +this.isFollowed);
+            } catch (error) {
+                console.error('Error loading follow status:', error);
+            }
+
+
+        }
+    }
 }
 </script>
 
@@ -66,7 +140,7 @@ export default {
     top: 130px;                 /* 定位到顶部 */
     left: 0;                /* 从左边开始 */
     width: 100%;           /* 占满全屏宽度 */
-    height: 100%;           
+    height: 32%;           
     background-image: url('../assets/person_background.jpg');  
     background-size: cover;  /* 背景图自动适应尺寸 */
     background-position: center center;  /* 背景图居中 */
@@ -82,7 +156,7 @@ export default {
     background-color: #f1f2f3;
 }
 .user-info {
-    margin-top: 90px;
+    margin-top: 11.5%;
     z-index: 1;
     position: relative;
 }

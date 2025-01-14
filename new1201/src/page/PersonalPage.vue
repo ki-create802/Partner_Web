@@ -6,13 +6,10 @@
         <InformationBox />
     </div>
     <!-- 添加背景图层 -->
-    <!-- <div class="background-layer"></div> -->
+    <div class="background-layer"></div>
     <div class="more-info">
         <div class="achievement">
-            <div class="medal1">
-                <img src="../assets/medal1.png" class="img_m1" />
-                <span class="m1"></span>
-            </div>
+            
         </div>
         <div class="tabWidget">
             <div class="tabs">
@@ -28,44 +25,26 @@
                 </button>
             </div>
             <div class="tab-content">
+                <!-- 加载状态 -->
+                <div v-if="isLoading" class="loading">加载中...</div>
+                <!-- 错误提示 -->
+                <div v-if="error" class="error">{{ error }}</div>
+                <!-- 等搭中内容 -->
                 <div v-if="currentTab === 'waiting'" class="wait-content">
-                    <!-- 等搭中内容 -->
-                    <FindListItem />
+                    <FindListItem 
+                        v-for="(chat,index) in pendingChats" 
+                        :key="index" 
+                        :item="chat" />
                 </div>
+                <!-- 历史内容 -->
                 <div v-if="currentTab === 'history'" class="his-content">
-                    <!-- 历史内容 -->
-                    <p>历史的聊天框内容。</p>
+                    <FindListItem 
+                        v-for="(chat,index) in historyChats" 
+                        :key="index" 
+                        :item="chat" />
                 </div>
             </div>
         </div>
-    </div>
-
-    <div v-if="showResetPasswordModal" class="reset-password-modal">
-        <h2>请重新设置您的密码</h2>
-        <form @submit.prevent="resetPassword">
-            <div class="form-group">
-                <label for="newPassword">新的密码：</label>
-                <input
-                    type="password"
-                    id="newPassword"
-                    v-model="newPassword"
-                    placeholder="Enter new password"
-                    required
-                />
-            </div>
-            <div class="form-group">
-                <label for="confirmPassword">确认密码：</label>
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    v-model="confirmPassword"
-                    placeholder="Confirm new password"
-                    required
-                />
-            </div>
-            <button type="submit">重置密码</button>
-            <button type="button" @click="closeResetPasswordModal">取消</button>
-        </form>
     </div>
 
 </template>
@@ -74,12 +53,17 @@
 import InformationBox from '../components/InformationBox.vue';
 import GuideBar from '@/components/GuideBar.vue';
 import FindListItem from '@/components/FindListItem.vue';
+import axios from 'axios';
 
 export default {
     name: 'HomePage',
     data() {
         return {
-            currentTab: 'waiting' // 默认显示“等搭中”
+            currentTab: 'waiting', // 默认显示“等搭中”
+            pendingChats: [],
+            historyChats: [],
+            isLoading: false,
+            error: null,
         }
     },
     components: {
@@ -87,14 +71,65 @@ export default {
         InformationBox,
         FindListItem,
     },
-    
+    methods: {
+        async fetchPendingChats() {
+            this.isLoading = true;
+            this.error = null;
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const userID = user.UID;
+                // console.log(userID);
+                const response = await axios.post(`http://localhost:8082/chat/getPendingChats`, {
+                    userID: userID
+                });
+                alert("接收到的response"+JSON.stringify(response));
+                this.pendingChats=response.data.data.pendingChats;
+                alert("接收到的9999:"+JSON.stringify(this.pendingChats));
+            } catch (err) {
+                this.error = '获取等搭中聊天室失败，请重试';
+                console.error(err);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        async fetchHistoryChats() {
+            this.isLoading = true;
+            this.error = null;
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const userID = user.UID;
+                const response = await axios.post(`http://localhost:8082/chat/getHistoryChats`, {
+                    userID: userID
+                });
+                alert("接收到的消息："+JSON.stringify(response.data.data.pendingchats));
+                this.historyChats=response.data.data.pendingChats;
+            } catch (err) {
+                this.error = '获取历史聊天室失败，请重试';
+                console.error(err);
+            } finally {
+                this.isLoading = false;
+            }
+        }
+    },
+    watch: {
+        currentTab(newTab) {
+            if (newTab === 'waiting') {
+                this.fetchPendingChats();
+            } else if (newTab === 'history') {
+                this.fetchHistoryChats();
+            }
+        },
+    },
+    mounted() {
+        this.fetchPendingChats();
+    },
 }
 </script>
 
 <style scoped>
 .background-layer {
     position: absolute;     /* 使用绝对定位 */
-    top: 130px;                /* 定位到顶部*/
+    top: 130px;                 /* 定位到顶部 */
     left: 0;                /* 从左边开始 */
     width: 100%;           /* 占满全屏宽度 */
     height: 32%;           
@@ -108,20 +143,23 @@ export default {
     z-index: 0;                   
 }
 .more-info {
+    /* margin-top: 1%; */
     display: flex;
     gap: 30px;
-    background-color: #f1f2f3;
+    background-color: rgba(252, 238, 118, 0.1);
 }
 .user-info {
-    margin-top: 90px;
+    margin-top: 11.5%;
     z-index: 1;
     position: relative;
 }
 .achievement {
-    height: 700px;
-    width: 320px;
-    background: white;
-    margin-top: 15px;
+    height: 720px;
+    width: 19%;
+    background-image: url('../assets/medal_background.png');
+    background-size: cover;
+    background-position: center center;
+    margin-top: 40px;
     margin-left: 50px;
 }
 .medal1 {
@@ -135,6 +173,8 @@ export default {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     padding: 15px;
     margin-left: 35px;
+    margin-top: 20px;
+    width: 70%;
 }
 .tabs {
     display: flex;
@@ -149,23 +189,21 @@ export default {
     transition: background-color 0.3s;
 }
 .tabs button.active {
-    background-color: #007bff;
+    background-color: #43baf597;
     color: white;
 }
 .tab-content {
-    width: 1300px;
-    height: 650px;
+    width: 100%;
+    height: 1050px;
     border: 1px solid #f1f2f3;
-    background-color: white;
+    background-color: rgba(238, 179, 179, 0.407);
 }
 .wait-content {
     padding: 10px;
     margin: 10px;
-    background: #d2030398;
 }
 .his-content {
     padding: 10px;
-    margin: 10px;
-    background: #d2030398;
+    margin: 5px;
 }
 </style>

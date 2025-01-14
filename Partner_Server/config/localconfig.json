@@ -2,7 +2,7 @@
   "databaseConfig": {
     "driverName": "mysql",
     "user": "root",
-    "password": "root",
+    "password": "sysu",
     "host": "localhost",
     "port": "3306",
     "database": "partner",
