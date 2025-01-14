@@ -94,10 +94,11 @@ export default {
 .totalcontainer {
   height: 100px;
   border-radius: 16px;
-  padding: 15px;
+  padding: 0px;
   box-shadow: 0 4px 4px rgb(194, 179, 152);
   background-color: rgba(250, 235, 215, 0.61);
-
+  padding-right: 15px;
+  padding-left: 15px;
   background-position: center;
 }
 
@@ -129,7 +130,7 @@ left {
 .room-info {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* 垂直居中 */
+  justify-content: left; /* 垂直居中 */
 }
 
 /* 房间名称和房间号 */
@@ -137,6 +138,7 @@ left {
   color: #e6a4b4;
   font-size: 1em;
   font-weight: 900;
+  text-align: left;
 }
 
 /* 房间简介 */

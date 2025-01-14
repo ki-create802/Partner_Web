@@ -41,7 +41,12 @@ type InUserController interface {
 	//GetUserReviews(c *gin.Context) //获取评分
 	GetUserLevel(c *gin.Context)  //获取用户等级
 	ResetPassword(c *gin.Context) //重置密码
+<<<<<<< HEAD
+	IsFollow(c *gin.Context)      //是否关注
+	CancelFollow(c *gin.Context)  //取消关注
+=======
 	EditPassword(c *gin.Context)  //修改密码
+>>>>>>> 7648bae0bb450212440401c34f4fa557b78c7f69
 
 	IsFollow(c *gin.Context)     //是否关注
 	CancelFollow(c *gin.Context) //取消关注

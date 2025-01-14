@@ -46,6 +46,10 @@ export default {
 </script>
 
 <style scoped>
+.chat-list{
+  border-radius:20px ;
+  border-right: 2px solid #ccc;
+}
 .searchContainer{
   height: 40px;
   display: flex;
@@ -57,20 +61,23 @@ export default {
   height: 100%;
   width: 80%;
   border: none;
+  border-radius: 5px;
   font-size: 16px;
+  margin-right: 10px;
 }
 .searchContainer button{
-  background-color: #b8f1ff;
+  background-color: #c1ecd9;
   border: none;
   height: 100%;
   width: 20%;
-  color:rgb(93, 145, 194);
+  color:rgb(255, 255, 255);
+  border-radius: 5px;
 }
 .searchContainer button:hover{
-  background-color: #a7cbef;;
+  background-color: #78bb9c;;
 }
 .chat-list {
-  background-color: #e8f6fd;
+  background-color: #ffffff87;
   width: 300px;
   border-right: 1px solid #ccc;
   padding: 10px;

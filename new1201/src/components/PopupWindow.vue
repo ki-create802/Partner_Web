@@ -26,7 +26,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(255, 255, 255, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -34,7 +34,7 @@
   }
   
   .popup-content {
-    background: white;
+    background: rgb(255, 233, 233);
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -49,12 +49,12 @@
     right: 10px; /* 调整到右上角 */
     background-color: transparent;
     border: none;
-    font-size: 48px;
+    font-size: 32px;
     cursor: pointer;
     color: #d4d4d4; /* 设置按钮文字颜色 */
   }
   
   .close-button:hover {
-    color: #484848; /* 鼠标悬停时改变颜色 */
+    color: rgb(255, 145, 143); /* 鼠标悬停时改变颜色 */
   }
   </style>

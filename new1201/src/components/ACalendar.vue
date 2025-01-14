@@ -80,7 +80,7 @@ export default {
         const uid = user.UID;
       //向后端发送请求个人日程请求
         const response=await api_ScheduleItems(uid);
-        alert("个人行程："+JSON.stringify(response));
+        //alert("个人行程："+JSON.stringify(response));
         this.scheduleItems = response;
         this.$emit('update-schedule-items', this.scheduleItems);
       } catch (error) {
