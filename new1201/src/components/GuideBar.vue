@@ -84,6 +84,11 @@
   .mybackground {
     background: linear-gradient(to bottom, rgb(9, 100, 175), rgba(255, 255, 255, 0));
     padding: 20px;
+    position: fixed;
+    top: 0; /* 距离顶部为 0 */
+    left: 0; /* 距离左侧为 0 */
+    width: 100%; /* 宽度占满整个页面 */
+    z-index: 1000; /* 确保 GuideBar 在最上层 */
   }
   
   .searchbody {

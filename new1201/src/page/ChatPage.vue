@@ -3,7 +3,7 @@
   <div class="chat-container">
     <ChatList 
       @chat-selected="onChatSelected" 
-      @search-chats="getChatsList"
+      @search-chats="getChatsList_"
       :chats="chats"
     />
     <ChatArea v-if="selectedChat"
@@ -217,11 +217,12 @@ beforeUnmount() {
 
 <style scoped>
 .chat-container {
-max-width: 1200px;
-display: flex;
-width: 80%;
-margin: 0 auto;
-border: 1px solid #ccc;
-height: 800px;
+  max-width: 1200px;
+  display: flex;
+  width: 80%;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  height: 800px;
+  margin: 140px auto 100px; 
 }
 </style>

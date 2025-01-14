@@ -5,7 +5,7 @@ const API_BASE_URL = 'http://localhost:8082';
 //const test_URL = 'http://localhost:3000/api';
 
 // 获取聊天列表
-/*
+/*alert
 */
 export const getChatsList = async (userID, searchWord) => {
   try {
@@ -13,10 +13,9 @@ export const getChatsList = async (userID, searchWord) => {
       userID,
       searchWord,
     });
-    alert("聊天列表："+JSON.stringify(response.data.data.chatList));
     return response.data.data.chatList;
   } catch (error) {
-    alert('Error fetching chat list:'+error);
+    console.error('获取聊天列表失败:', error);
     throw error;
   }
 };
@@ -144,8 +143,8 @@ response (返回的是数组，数组每一项对象如下结构)
 */
 export const fetchHotData = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/hot`);
-    return response.data;
+    const response = await axios.post(`${API_BASE_URL}/chat/getTopChatRooms`);
+    return response.data.data.topChatRooms;
   } catch (error) {
     console.error('Error fetching hot data:', error);
     throw error;
@@ -197,7 +196,6 @@ export const searchUsers = async (searchWord) => {
     const response = await axios.post(`${API_BASE_URL}/chat/searchUser`, {
       query: searchWord
     });
-    alert("后端返回用户俩表："+JSON.stringify(response));
     return response.data.data.userList;
   } catch (error) {
     console.error('Error searching users:', error);
@@ -234,7 +232,6 @@ respone:
 // };
 export const login = async (email, password) => {
     try {
-      alert("进入登录");
       const response = await axios.post(`${API_BASE_URL}/user/login`, {
         Email: email,
         Password: password,
@@ -257,7 +254,6 @@ export const getFansNum = async () => {
     });
     alert("后端粉丝数"+JSON.stringify(response.data.data));
     return response.data.data.fansNum;
-    
   } catch (error) {
     console.error('Error logging in:', error);
     throw error;
@@ -325,16 +321,12 @@ export const newRoom = async (roomName, typeID,Uid,memberNum,dateTime,remark) =>
       CYueDate:dateTime,
       Cremark:remark
     });
-    alert(JSON.stringify(response));
-    alert("chat新建："+JSON.stringify({roomName, typeID,Uid,memberNum,dateTime,remark}));
     if (response.data.code==200)return true;
     else return false;
   } catch (error) {
-    
-    alert("新建房间失败");
+    alert("新建房间失败"+error);
     console.error('Error signing up:', error);
     throw error;
-    
   }
 };
 
@@ -354,7 +346,6 @@ export const checkCode = async (email,code) => {
   }
 };
 
-//忘记密码
 export const forgetPW = async (email) => {
   alert("邮箱："+email);
   try {
@@ -362,6 +353,10 @@ export const forgetPW = async (email) => {
       email,
     });
     if(response.data.code==200)return true;
+    else if(response.data.code==202){
+      alert("该邮箱未注册");
+      return false;
+    }
     else return false;
   } catch (error) {
     console.error('Error signing up:', error);
@@ -400,4 +395,58 @@ export const joinChat = async (cid,uid) => {
   }
 };
   
-  
+//修改密码
+export const editPW = async (uid,newPW) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/editPassword`, {
+      userid:uid,
+      newPassword:newPW
+    });
+    if(response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    console.error('修改密码失败', error);
+    throw error;
+  }
+};
+
+//修改昵称请求
+export const editNewName = async (uid,newName) => {
+  alert("修改昵称请求："+uid+":"+newName);
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/editInfo`, {
+      UID:uid,
+      UName:newName
+    });
+    if(response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    console.error('修改密码失败', error);
+    throw error;
+  }
+};
+
+// 上传头像请求
+export const uploadAvatar = async (uid, file) => {
+  alert("上传头像请求：" + uid + "，文件名：" + file.name);
+  try {
+    // 创建 FormData 对象
+    const formData = new FormData();
+    formData.append("userID", uid); // 添加用户ID（注意：后端使用的是 userID）
+    formData.append("avatar", file); // 添加头像文件
+
+    // 发送 POST 请求
+    const response = await axios.post(`${API_BASE_URL}/file/uploadAvatar`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data", // 设置请求头
+      },
+    });
+
+    // 根据响应结果返回 true 或 false
+    if (response.data.code == 200) return true;
+    else return false;
+  } catch (error) {
+    console.error("上传头像失败", error);
+    throw error;
+  }
+};
