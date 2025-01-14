@@ -15,7 +15,6 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 	userController := controller.NewUserController()
 	userRoutes := r.Group("/user")
 	{
-<<<<<<< HEAD
 		userRoutes.POST("register", userController.Register) // 注册
 		userRoutes.POST("login", userController.Login)       // 登录
 		userRoutes.POST("logout", userController.Logout)     //登出
@@ -25,13 +24,6 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		userRoutes.POST("cancelFollow", userController.CancelFollow) //取消关注
 		userRoutes.POST("fansNum", userController.FansNum)           //粉丝数量
 
-=======
-		userRoutes.POST("register", userController.Register)                 // 注册
-		userRoutes.POST("login", userController.Login)                       // 登录
-		userRoutes.POST("logout", userController.Logout)                     //登出
-		userRoutes.POST("guanzhu", userController.GuanZhu)                   //关注用户
-		userRoutes.POST("fansNum", userController.FansNum)                   //粉丝数量
->>>>>>> ee2cd52f60e4f3997e1962af845d1cea6bff7520
 		userRoutes.POST("editInfo", userController.EditInfo)                 //用户编辑信息
 		userRoutes.POST("info", userController.Info)                         //返回用户信息
 		userRoutes.POST("forgot-password", userController.ForgotPassword)    //忘记密码
@@ -41,12 +33,7 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		//userRoutes.POST("getUserReviews", userController.GetUserReviews)     // 获取用户评分
 		userRoutes.POST("getUserLevel", userController.GetUserLevel)   // 获取用户等级称号
 		userRoutes.POST("resetPassword", userController.ResetPassword) //重置密码
-<<<<<<< HEAD
-		userRoutes.POST("editPassword", userController.EditPassword)   //重置密码
-
-=======
 		userRoutes.POST("editPassword", userController.EditPassword)   //xiugai密码
->>>>>>> ee2cd52f60e4f3997e1962af845d1cea6bff7520
 	}
 
 	chatController := controller.NewChatController()
