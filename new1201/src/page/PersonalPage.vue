@@ -30,7 +30,7 @@
             <div class="tab-content">
                 <div v-if="currentTab === 'waiting'" class="wait-content">
                     <!-- 等搭中内容 -->
-                    <p>等搭中的聊天框内容。</p>
+                    <FindListItem />
                 </div>
                 <div v-if="currentTab === 'history'" class="his-content">
                     <!-- 历史内容 -->
@@ -45,6 +45,7 @@
 <script>
 import InformationBox from '../components/InformationBox.vue';
 import GuideBar from '@/components/GuideBar.vue';
+import FindListItem from '@/components/FindListItem.vue';
 
 export default {
     name: 'HomePage',
@@ -56,6 +57,7 @@ export default {
     components: {
         GuideBar,
         InformationBox,
+        FindListItem,
     },
 }
 </script>

@@ -34,8 +34,10 @@ import { getFansNum } from '@/api.js';
 export default {
   name: 'InformationBox',
   data() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const UserID = user.UID;
     return{
-      avatarUrl:require("@/assets/avatar.png"), // 默认头像
+      avatarUrl: UserID ? `http://localhost:8082/avatars/${UserID}.jpg` : require("@/assets/avatar.png"),
       username: JSON.parse(localStorage.getItem('user')).UName||'默认用户名',
       followersCount: 2000,
       signature: JSON.parse(localStorage.getItem('user')).URemark ||'默认个性签名',
