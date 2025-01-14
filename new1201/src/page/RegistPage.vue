@@ -1,4 +1,5 @@
 <template>
+    <div class="bgimg"></div>
     <div class="signup-container">
         <h1>注册您的账号</h1>
         <form @submit.prevent="handleSignUp">
@@ -12,9 +13,9 @@
                     required
                 />
             </div>
-            
-            <div class="form-group">
-                <label for="username">姓名:</label>
+
+            <div class = "form-group">
+                <label for = "username">用户名：</label>
                 <input
                     type="username"
                     id="username"
@@ -23,7 +24,7 @@
                     required
                 />
             </div>
-
+  
             <div class="form-group">
                 <label for="password">密码:</label>
                 <input
@@ -62,8 +63,8 @@
     data() {
         return {
             email: "",
-            password: "",
             username:"",
+            password: "",
             confirmPassword: "",
             errorMessage: "",
         };
@@ -94,14 +95,31 @@
   
 <style scoped>
   /* Add styles similar to Login.vue */
+  .bgimg{
+        /* width: 150px;
+        height: 60px; */
+        width: 100%;
+        height: 100%;
+        position: fixed; 
+        top: 0;
+        left: 0;
+        background-image: url('~@/assets/login_bg.JPG');
+        background-size: cover;
+        background-position: center; /* 居中对齐背景图 */
+        z-index: -1; /* 设置层级，使其在所有内容下方 */
+    }
     .signup-container {
         max-width: 400px;
-        margin: 100px auto;
+        margin: 180px auto;
         padding: 40px;
         border: 1px solid #ddd;
         border-radius: 8px;
-        background-color: #f9f9f9;
+        /* background-color: #f9f9f9;
+        text-align: center; */
+        background-color: rgba(255, 255, 255, 0.5); /* 半透明白色背景 */
         text-align: center;
+        position: relative;
+        z-index: 1;
     }
   
     h1 {

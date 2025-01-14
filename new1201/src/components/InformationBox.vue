@@ -1,4 +1,5 @@
 <template>
+  <div class="background-layer"></div>
   <div class="information">
     <div class="avatar-container">
       <div class="avatar">
@@ -101,6 +102,21 @@ export default {
 </script>
 
 <style>
+.background-layer {
+    position: absolute;     /* 使用绝对定位 */
+    /* top: 130px;                定位到顶部 */
+    left: 0;                /* 从左边开始 */
+    width: 100%;           /* 占满全屏宽度 */
+    height: 100%;           
+    background-image: url('../assets/person_background.jpg');  
+    background-size: cover;  /* 背景图自动适应尺寸 */
+    background-position: center center;  /* 背景图居中 */
+    background-repeat: no-repeat;  /* 不重复背景图 */
+    background-size: cover;  /* 背景图自动适应尺寸 */
+    background-position: center center;  /* 背景图居中 */
+    background-repeat: no-repeat;  /* 不重复背景图 */
+    z-index: -1;                   
+}
 .information {
   display: flex;
   padding: 25px;
@@ -115,6 +131,8 @@ export default {
   margin-bottom: 5px;
   margin-left: 25px;
   margin-right: 35px;
+  background-color: rgba(255, 255, 255, 0.1);  /* 设置白色半透明背景 */
+
 }
 
 .avatar {
@@ -125,6 +143,8 @@ export default {
   overflow: hidden;
   margin-bottom: 10px;
   margin-top: 15px;
+  background-color: rgba(255, 255, 255, 0.1);  /* 设置白色半透明背景 */
+
 }
 
 .avatar img {

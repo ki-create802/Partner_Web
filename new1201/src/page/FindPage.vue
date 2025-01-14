@@ -106,7 +106,7 @@ export default {
 
 <style scoped>
 .searchContainer {
-  margin-top: 20px;
+  margin-top: 130px;
   display: flex;
   justify-content: center;
 }

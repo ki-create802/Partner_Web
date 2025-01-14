@@ -6,7 +6,7 @@
         <InformationBox />
     </div>
     <!-- 添加背景图层 -->
-    <div class="background-layer"></div>
+    <!-- <div class="background-layer"></div> -->
     <div class="more-info">
         <div class="achievement">
             <div class="medal1">
@@ -40,6 +40,34 @@
         </div>
     </div>
 
+    <div v-if="showResetPasswordModal" class="reset-password-modal">
+        <h2>请重新设置您的密码</h2>
+        <form @submit.prevent="resetPassword">
+            <div class="form-group">
+                <label for="newPassword">新的密码：</label>
+                <input
+                    type="password"
+                    id="newPassword"
+                    v-model="newPassword"
+                    placeholder="Enter new password"
+                    required
+                />
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">确认密码：</label>
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    v-model="confirmPassword"
+                    placeholder="Confirm new password"
+                    required
+                />
+            </div>
+            <button type="submit">重置密码</button>
+            <button type="button" @click="closeResetPasswordModal">取消</button>
+        </form>
+    </div>
+
 </template>
 
 <script>
@@ -59,13 +87,14 @@ export default {
         InformationBox,
         FindListItem,
     },
+    
 }
 </script>
 
 <style scoped>
 .background-layer {
     position: absolute;     /* 使用绝对定位 */
-    top: 130px;                 /* 定位到顶部 */
+    top: 130px;                /* 定位到顶部*/
     left: 0;                /* 从左边开始 */
     width: 100%;           /* 占满全屏宽度 */
     height: 32%;           

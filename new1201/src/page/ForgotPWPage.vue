@@ -1,4 +1,5 @@
 <template>
+  <div class="bgimg"></div>
     <div class="forgot-password-container">
       <!-- 判断是否显示验证码及邮箱表单 -->
       <div v-if="!showResetPasswordModal">
@@ -34,41 +35,41 @@
             <input
               type="text"
               v-model="verificationCode"
-              placeholder="Enter verification code"
+              placeholder="输入验证码"
               required
             />
           </div>
   
-          <p v-if="isCodeSent">A verification code has been sent to your email.</p>
+          <p v-if="isCodeSent">验证码已经发送到您的邮箱</p>
           <button type="submit" v-if="isCodeSent">确认</button>
         </form>
       </div>
   
       <!-- 重设密码弹窗 -->
       <div v-if="showResetPasswordModal" class="reset-password-modal">
-        <h2>Reset Your Password</h2>
+        <h2>请重新设置您的密码</h2>
         <form @submit.prevent="resetPassword">
           <div class="form-group">
-            <label for="newPassword">New Password</label>
+            <label for="newPassword">新的密码：</label>
             <input
               type="password"
               id="newPassword"
               v-model="newPassword"
-              placeholder="Enter new password"
+              placeholder="请输入密码"
               required
             />
           </div>
           <div class="form-group">
-            <label for="confirmPassword">Confirm Password</label>
+            <label for="confirmPassword">确认密码：</label>
             <input
               type="password"
               id="confirmPassword"
               v-model="confirmPassword"
-              placeholder="Confirm new password"
+              placeholder="请再次确认密码"
               required
             />
           </div>
-          <button type="submit">Reset Password</button>
+          <button type="submit">确认</button>
         </form>
       </div>
     </div>
@@ -154,14 +155,31 @@
   </script>
   
   <style scoped>
+  .bgimg{
+        /* width: 150px;
+        height: 60px; */
+        width: 100%;
+        height: 100%;
+        position: fixed; 
+        top: 0;
+        left: 0;
+        background-image: url('~@/assets/login_bg.JPG');
+        background-size: cover;
+        background-position: center; /* 居中对齐背景图 */
+        z-index: -1; /* 设置层级，使其在所有内容下方 */
+    }
   .forgot-password-container {
     max-width: 400px;
     margin: 100px auto;
     padding: 40px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    background-color: #f9f9f9;
+    /* background-color: #f9f9f9;
+    text-align: center; */
+    background-color: rgba(255, 255, 255, 0.5); /* 半透明白色背景 */
     text-align: center;
+    position: relative;
+    z-index: 1;
   }
   
   h1 {
@@ -182,7 +200,7 @@
   }
   
   input[type="email"],
-  input[type="text"] {
+  input[type="text"]{
     flex: 1;
     padding: 8px;
     border: 1px solid #ccc;
@@ -214,7 +232,8 @@
     padding: 40px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    background-color: #fefefe;
+    /* background-color: #fefefe; */
+    background-color: rgba(255, 255, 255, 0.5);
     text-align: left;
   }
   
@@ -223,9 +242,15 @@
   }
   
   .form-group {
-    margin-bottom: 15px;
+      margin-bottom: 15px;
+      /* text-align: left; */
   }
-  
+
+  label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+  }
   input[type="password"] {
     width: 100%;
     padding: 8px;

@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue-3/dist/bootstrap-vue-3.css';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
+import './assets/global.css'; 
 
 const app = createApp(App);
 app.use(BootstrapVue3);
