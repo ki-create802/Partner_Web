@@ -63,4 +63,8 @@ type ChatInfo struct {
 	CYueDate    string    `gorm:"column:c_yue_date"`
 	CCreateTime time.Time `gorm:"column:c_create_time"`
 	Cremark     string    `gorm:"column:cremark"`
+
+	RoomOwnerName string   `gorm:"-" json:"roomOwnerName"` // 房主名字
+	RoomOwnerImg  string   `gorm:"-" json:"roomOwnerImg"`  // 房主头像
+	MemberList    []Member `gorm:"-" json:"memberList"`    // 成员列表
 }

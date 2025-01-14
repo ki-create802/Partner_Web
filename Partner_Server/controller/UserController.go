@@ -39,8 +39,7 @@ type InUserController interface {
 
 	//AddReview(c *gin.Context)      //评分功能
 	//GetUserReviews(c *gin.Context) //获取评分
-	GetUserLevel(c *gin.Context) //获取用户等级
-
+	GetUserLevel(c *gin.Context)  //获取用户等级
 	ResetPassword(c *gin.Context) //重置密码
 
 }
