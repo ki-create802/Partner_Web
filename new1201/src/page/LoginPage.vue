@@ -61,6 +61,7 @@ import { login } from '@/api.js';
                     this.errorMessage = "账号或密码不能为空！";
                     return;
                 }
+        
                 try {
                     const data=await login(this.email,this.password);
                     if (data) {
@@ -69,9 +70,10 @@ import { login } from '@/api.js';
                         this.$router.push("/HomePage"); // 登录成功后跳转到主页
                     } else {
                         this.errorMessage = data.message;
+                        // this.errorMessage = "账号或密码错误";
                     }
                 } catch (error) {
-                    this.errorMessage = "网络错误，请稍后再试。";
+                    this.errorMessage = "账号或密码错误";
                 }
             }
     

@@ -10,7 +10,7 @@
               type="password"
               id="newPassword"
               v-model="newPassword"
-              placeholder="Enter new password"
+              placeholder="请输入密码"
               required
             />
           </div>
@@ -20,7 +20,7 @@
               type="password"
               id="confirmPassword"
               v-model="confirmPassword"
-              placeholder="Confirm new password"
+              placeholder="请再次确认密码"
               required
             />
           </div>
@@ -88,7 +88,7 @@ export default{
     }
 .modify-pw-container{
     max-width: 400px;
-    margin: 100px auto;
+    margin: 180px auto;
     padding: 40px;
     border: 1px solid #ddd;
     border-radius: 8px;

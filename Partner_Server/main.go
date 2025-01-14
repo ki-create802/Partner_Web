@@ -133,8 +133,8 @@ import (
 
 func main() {
 	//定义Redis服务器路径
-	redisServerPath := "../Redis-x64-3.2.100/redis-server.exe"
-	// redisServerPath := "/opt/homebrew/bin/redis-server"
+	// redisServerPath := "../Redis-x64-3.2.100/redis-server.exe"
+	redisServerPath := "/opt/homebrew/bin/redis-server"
 
 	//启动Redis服务器
 	redisServerCmd := exec.Command(redisServerPath)
@@ -171,8 +171,8 @@ func main() {
 	time.Sleep(2 * time.Second)
 
 	//定义Redis客户端路径
-	redisClientPath := "../Redis-x64-3.2.100/redis-cli.exe"
-	// redisClientPath := "/opt/homebrew/bin/redis-cli"
+	// redisClientPath := "../Redis-x64-3.2.100/redis-cli.exe"
+	redisClientPath := "/opt/homebrew/bin/redis-cli"
 	redisClientCmd := exec.Command(redisClientPath, "ping")
 	redisClientCmd.Stdout = os.Stdout
 	redisClientCmd.Stderr = os.Stderr
