@@ -660,8 +660,6 @@ func (a UserController) ResetPassword(c *gin.Context) {
 	common.Success(c, nil, "密码更新成功")
 }
 
-<<<<<<< HEAD
-=======
 // 修改密码
 func (a UserController) EditPassword(c *gin.Context) {
 	var request struct {
@@ -698,7 +696,6 @@ func (a UserController) EditPassword(c *gin.Context) {
 	common.Success(c, nil, "密码更新成功")
 }
 
->>>>>>> 7648bae0bb450212440401c34f4fa557b78c7f69
 // 是否关注当前用户
 func (a UserController) IsFollow(c *gin.Context) {
 	var requestUser model.Gz
@@ -718,11 +715,7 @@ func (a UserController) IsFollow(c *gin.Context) {
 
 	// 查询 gz_match 表中是否存在该关注关系
 	var count int64
-<<<<<<< HEAD
-	a.DB.Table("gzmatch").Where("gz_id = ? AND bgz_id = ?", gzid, bgzid).Count(&count)
-=======
 	a.DB.Table("gzmatch").Debug().Where("gz_id = ? AND bgz_id = ?", gzid, bgzid).Count(&count)
->>>>>>> 7648bae0bb450212440401c34f4fa557b78c7f69
 
 	// 返回结果
 	if count > 0 {
