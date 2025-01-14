@@ -2,20 +2,20 @@
   <div class="message-container">
     <div v-if="!isCurrentUser" class="message left">
       <div class="senderInfo">
-        <img class="userImg" :src="'http://localhost:3000/'+message.senderAvatarSrc"/>
-        <strong>{{ message.senderName }}</strong>
+        <img class="userImg" :src="`http://localhost:8082/avatars/${message.UID}.jpg`"/>
+        <strong>{{ message.UName }}</strong>
       </div>
       <div class="message-content">
-         {{ message.text }}
+         {{ message.RContent }}
       </div>
     </div>
     <div v-else class="message right">
       <div class="message-content">
-         {{ message.text }}
+         {{ message.RContent }}
       </div>
       <div class="senderInfo">
-        <img class="userImg" :src="'http://localhost:3000/'+message.senderAvatarSrc"/>
-        <strong>{{ message.senderName }}</strong>
+        <img class="userImg" :src="`http://localhost:8082/avatars/${message.UID}.jpg`"/>
+        <strong>{{ message.UName }}</strong>
       </div>
     </div>
   </div>
