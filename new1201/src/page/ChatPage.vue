@@ -169,8 +169,7 @@ methods: {
       senderAvatarSrc: this.userImg,
       isImage: false,
       imageSrc: ''
-  };
-
+    };
     // 发送新消息请求到后端
     try{
       let ok=false;
@@ -182,7 +181,7 @@ methods: {
       alert("发送消息失败！");
     }
   },
-  // 开启长轮询
+  // 开启轮询
     startPolling() {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
@@ -201,7 +200,7 @@ methods: {
       }
     }, 1000); // 每1秒轮询一次 
   },
-  // 停止长轮询
+  // 停止轮询
   stopPolling() {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
