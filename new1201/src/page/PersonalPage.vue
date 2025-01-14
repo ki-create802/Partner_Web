@@ -101,8 +101,8 @@ export default {
                 const response = await axios.post(`http://localhost:8082/chat/getHistoryChats`, {
                     userID: userID
                 });
-                alert("接收到的消息："+JSON.stringify(response.data.data.pendingchats));
-                this.historyChats=response.data.data.pendingChats;
+                alert("接收到的消息："+JSON.stringify(response.data.data.historyChats));
+                this.historyChats=response.data.data.historyChats;
             } catch (err) {
                 this.error = '获取历史聊天室失败，请重试';
                 console.error(err);
