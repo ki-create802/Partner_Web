@@ -41,6 +41,7 @@ type InUserController interface {
 	//GetUserReviews(c *gin.Context) //获取评分
 	GetUserLevel(c *gin.Context)  //获取用户等级
 	ResetPassword(c *gin.Context) //重置密码
+	EditPassword(c *gin.Context)  //修改密码
 
 }
 
@@ -284,6 +285,7 @@ func (a UserController) EditInfo(c *gin.Context) { //修改未测试
 	userRemark := requestUser.URemark
 	userImage := requestUser.UImage
 
+	fmt.Println("chuanru::::", userName)
 	// 数据验证
 	var user model.User
 	a.DB.Table("user").Where("uid=?", userid).First(&user)
@@ -300,7 +302,7 @@ func (a UserController) EditInfo(c *gin.Context) { //修改未测试
 		URemark: userRemark,
 		UImage:  userImage,
 	}
-	a.DB.Table("user").Where("uid=?", userid).Updates(updateData)
+	a.DB.Table("user").Debug().Where("uid=?", userid).Updates(updateData)
 
 	// 返回成功响应
 	common.Success(c, nil, "用户信息更新成功")
@@ -351,7 +353,8 @@ func (a UserController) ForgotPassword(c *gin.Context) {
 	var user model.User
 	a.DB.Table("user").Where("uemail=?", email).First(&user)
 	if user.UID == 0 {
-		common.Fail(c, 422, nil, "该邮箱未注册")
+		// common.Fail(c, 202, nil, "该邮箱未注册")
+		common.Fail(c, 202, nil, "该邮箱未注册")
 		return
 	}
 
@@ -642,6 +645,42 @@ func (a UserController) ResetPassword(c *gin.Context) {
 		UKey: request.NewPassword,
 	}
 	result := a.DB.Table("user").Where("uemail=?", request.Email).Updates(updateData)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "密码更新失败")
+		return
+	}
+
+	common.Success(c, nil, "密码更新成功")
+}
+
+// 修改密码
+func (a UserController) EditPassword(c *gin.Context) {
+	var request struct {
+		UserID      int    `json:"userid"`      // 用户ID
+		NewPassword string `json:"newPassword"` // 新密码
+	}
+
+	// 解析请求参数
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	// 验证用户ID是否存在
+	var user model.User
+	a.DB.Table("user").Where("uid=?", request.UserID).First(&user)
+	if user.UID == 0 {
+		common.Fail(c, 422, nil, "用户不存在")
+		return
+	}
+
+	// 更新密码
+	updateData := model.User{
+		UKey: request.NewPassword, // 将新密码赋值给 UKey
+	}
+
+	// 根据用户ID更新密码
+	result := a.DB.Table("user").Where("uid=?", request.UserID).Updates(updateData)
 	if result.Error != nil {
 		common.Fail(c, 500, nil, "密码更新失败")
 		return

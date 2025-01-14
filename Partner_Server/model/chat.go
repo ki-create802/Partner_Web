@@ -54,15 +54,15 @@ type Record struct {
 }
 
 type ChatInfo struct {
-	CID         int       `gorm:"column:cid"`
-	CName       string    `gorm:"column:cname"`
+	CID         int       `gorm:"column:cid" json:"roomID"`
+	CName       string    `gorm:"column:cname" json:"roomName"`
 	Bid         int       `gorm:"column:bid"`
-	Uid         int       `gorm:"column:uid"`
+	Uid         int       `gorm:"column:uid" json:"roomOwnerID"`
 	Cnumber     int       `gorm:"column:cnumber"`
 	Cstate      int       `gorm:"column:cstate"`
 	CYueDate    string    `gorm:"column:c_yue_date"`
 	CCreateTime time.Time `gorm:"column:c_create_time"`
-	Cremark     string    `gorm:"column:cremark"`
+	Cremark     string    `gorm:"column:cremark" json:"roomIntro"`
 
 	RoomOwnerName string   `gorm:"-" json:"roomOwnerName"` // 房主名字
 	RoomOwnerImg  string   `gorm:"-" json:"roomOwnerImg"`  // 房主头像

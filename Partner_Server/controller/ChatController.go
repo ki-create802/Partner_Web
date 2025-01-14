@@ -4,6 +4,8 @@ import (
 	"Partner_Web/Partner_Server/common"
 	"Partner_Web/Partner_Server/model"
 	"fmt"
+	"sort"
+	"strings"
 
 	"time"
 
@@ -27,8 +29,12 @@ type InChatController interface {
 	DisbandChatRoom(c *gin.Context) //房主解散群聊
 	LeaveChatRoom(c *gin.Context)   //退出群聊
 	AddMember(c *gin.Context)       //添加成员到uc_match表中
-	GetSpeakers(c *gin.Context)     //返回发言成员列表
-	SuccessMatch(c *gin.Context)    //成功加入聊天室 添加到success_match表格中
+
+	GetSpeakers(c *gin.Context)   //返回发言成员列表
+	GetRoomMember(c *gin.Context) //返回成功配对成员列表
+
+	SuccessMatch(c *gin.Context) //成功加入聊天室 添加到success_match表格中
+
 	GetPendingChats(c *gin.Context) //获取主页'等待中'板块聊天室列表
 	GetHistoryChats(c *gin.Context) //获取主页'历史'板块聊天室列表
 
@@ -264,12 +270,12 @@ func (b ChatController) LeaveChatRoom(c *gin.Context) {
 		return
 	}
 
-	// 从 uc_match 表中删除用户
-	result = b.DB.Table("uc_match").Where("cid = ? AND uid = ?", roomID, userID).Delete(&model.UcMatch{})
-	if result.Error != nil {
-		common.Fail(c, 500, nil, "从 uc_match 表中删除用户失败")
-		return
-	}
+	// // 从 uc_match 表中删除用户
+	// result = b.DB.Table("uc_match").Where("cid = ? AND uid = ?", roomID, userID).Delete(&model.UcMatch{})
+	// if result.Error != nil {
+	// 	common.Fail(c, 500, nil, "从 uc_match 表中删除用户失败")
+	// 	return
+	// }
 
 	common.Success(c, nil, "用户已成功退出群聊")
 }
@@ -347,6 +353,46 @@ func (b ChatController) GetSpeakers(c *gin.Context) {
 	common.Success(c, gin.H{"speakerList": speakerList}, "成功返回发言成员列表")
 }
 
+// 返回发言成员列表
+func (b ChatController) GetRoomMember(c *gin.Context) {
+	var request struct {
+		RoomID int `json:"roomID"`
+	}
+	c.Bind(&request)
+
+	roomID := request.RoomID
+
+	// 查询 success_match 表，获取发言成员列表
+	var speakers []model.UcMatch
+	result := b.DB.Table("success_match").Where("cid = ?", roomID).Find(&speakers)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "获取发言成员列表失败")
+		return
+	}
+
+	// 构建发言成员信息
+	var speakerList []map[string]interface{}
+	for _, speaker := range speakers {
+		// 查询 user 表，获取成员信息
+		var user model.User
+		result = b.DB.Table("user").Where("uid = ?", speaker.UID).First(&user)
+		if result.Error != nil {
+			common.Fail(c, 500, nil, "查询成员信息失败")
+			return
+		}
+
+		// 构建成员信息
+		speakerInfo := map[string]interface{}{
+			"userID":    user.UID,
+			"userName":  user.UName,
+			"userImage": user.UImage,
+		}
+		speakerList = append(speakerList, speakerInfo)
+	}
+	fmt.Println(speakerList)
+	common.Success(c, gin.H{"RoomMemberList": speakerList}, "成功返回发言成员列表")
+}
+
 func (b ChatController) CreateChat(c *gin.Context) { //创建聊天室 版块传消息的类型
 	var requestChat model.Room
 	// c.Bind(&requestChat)
@@ -415,6 +461,12 @@ func (b ChatController) SuccessMatch(c *gin.Context) { //添加成功匹配表
 		return
 	}
 
+	// 从 uc_match 表中删除相应的记录
+	if err := b.DB.Table("uc_match").Where("cid = ? AND uid = ?", roomID, userID).Delete(&model.UcMatch{}).Error; err != nil {
+		common.Fail(c, 500, nil, "删除 uc_match 记录失败")
+		return
+	}
+
 	common.Success(c, nil, "成员添加成功")
 }
 
@@ -437,7 +489,41 @@ func (b ChatController) ChatLists(c *gin.Context) {
 		return
 	}
 
-	// fmt.Println("cids", cids)
+	// 查询 chatinfo 表中 uid 等于传入的 userID 的 cid
+	var additionalCids []uint
+	if err := b.DB.Table("chatinfo").
+		Where("uid = ?", request.UID).
+		Pluck("cid", &additionalCids).Error; err != nil {
+		common.Fail(c, 500, nil, "查询 chatinfo 表失败")
+		return
+	}
+
+	// 从 success_match 表中获取 cid
+	var successMatchCids []uint
+	if err := b.DB.Table("success_match").
+		Where("uid = ?", request.UID).
+		Pluck("cid", &successMatchCids).Error; err != nil {
+		common.Fail(c, 500, nil, "查询 success_match 表失败")
+		return
+	}
+
+	// 将两个查询结果合并到 cids 列表中
+	cids = append(cids, additionalCids...)
+	cids = append(cids, successMatchCids...)
+
+	fmt.Println("cids", cids)
+
+	// 去重 cids 列表中的重复项
+	uniqueCids := make(map[uint]bool)
+	for _, cid := range cids {
+		uniqueCids[cid] = true
+	}
+
+	// 将去重后的 cids 重新赋值
+	cids = make([]uint, 0, len(uniqueCids))
+	for cid := range uniqueCids {
+		cids = append(cids, cid)
+	}
 
 	if len(cids) == 0 {
 		common.Success(c, nil, "未找到聊天室记录")
@@ -445,9 +531,10 @@ func (b ChatController) ChatLists(c *gin.Context) {
 	}
 
 	type ChatInfo struct {
-		CID   uint   `gorm:"column:cid"`
-		CName string `gorm:"column:cname"`
-		UID   uint   `gorm:"column:uid"`
+		CID     uint   `gorm:"column:cid"`
+		CName   string `gorm:"column:cname"`
+		UID     uint   `gorm:"column:uid"`
+		CRemark string `gorm:"column:cremark"`
 	}
 	// 从 chat_info 表中找到 cid 在 cids 列表中的行
 	var chatInfos []ChatInfo
@@ -460,37 +547,42 @@ func (b ChatController) ChatLists(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("chatInfos", chatInfos)
+	fmt.Println("chatInfos11111", chatInfos)
 
+	// 排序逻辑
+	sort.Slice(chatInfos, func(i, j int) bool {
+		// 检查 searchWord 是否在 cname 或 cremark 中
+		containsI := strings.Contains(chatInfos[i].CName, request.SearchWord) || strings.Contains(chatInfos[i].CRemark, request.SearchWord)
+		containsJ := strings.Contains(chatInfos[j].CName, request.SearchWord) || strings.Contains(chatInfos[j].CRemark, request.SearchWord)
+
+		// 如果 i 包含 searchWord 而 j 不包含，i 排在前面
+		if containsI && !containsJ {
+			return true
+		}
+		// 如果 j 包含 searchWord 而 i 不包含，j 排在前面
+		if containsJ && !containsI {
+			return false
+		}
+		// 如果都包含或都不包含，保持原有顺序
+		return i < j
+	})
+
+	fmt.Println("chatInfos22222", chatInfos)
+
+	// 构造返回数据
 	type Response struct {
-		CID    uint   `json:"id"`
-		CName  string `json:"name"`
-		UImage string `json:"ownerImage"`
+		CID   uint   `json:"id"`
+		UID   uint   `json:"ownerId"`
+		CName string `json:"name"`
 	}
-	// 对于每个 chatInfo，从 user 表中找到 uimage
 	var responses []Response
 	for _, chatInfo := range chatInfos {
-		var User struct {
-			UID    uint   `gorm:"column:uid"`
-			UImage string `gorm:"column:uimage"`
-		}
-		result := b.DB.Table("user").
-			Where("uid = ?", chatInfo.UID).
-			First(&User)
-		if result.Error != nil {
-			common.Fail(c, 500, nil, "查询 user 表失败")
-			return
-		}
-
-		// 构造返回数据
 		responses = append(responses, Response{
-			CID:    chatInfo.CID,
-			CName:  chatInfo.CName,
-			UImage: User.UImage,
+			CID:   chatInfo.CID,
+			UID:   chatInfo.UID,
+			CName: chatInfo.CName,
 		})
 	}
-	// fmt.Println("responses", responses)
-
 	// 返回结果
 	common.Success(c, gin.H{"chatList": responses}, "查询成功")
 
@@ -595,6 +687,8 @@ func (b ChatController) SaveChatRecords(c *gin.Context) { //存储聊天记录
 		return
 	}
 
+	fmt.Println("前端：", req)
+
 	// 2. 将 isImage 转换为 rtype
 	var rtype int
 	if req.NewMessage.IsImage {
@@ -616,8 +710,10 @@ func (b ChatController) SaveChatRecords(c *gin.Context) { //存储聊天记录
 	}
 
 	result := b.DB.Table("record").Create(&record)
+	fmt.Println("记录：", record)
 	if result.Error != nil {
 		common.Fail(c, 500, nil, "插入新聊天记录失败")
+		fmt.Println("插入record表失败12345")
 		return
 	}
 

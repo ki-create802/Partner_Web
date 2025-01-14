@@ -9,7 +9,6 @@
   
   <script>
 import router from '@/router';
-
   export default {
     name: 'OptionsOfGuideBar',
     methods: {
@@ -21,6 +20,7 @@ import router from '@/router';
       },
       handleChangePassword() {
         // 处理修改密码逻辑
+        router.push("ModifyPWPage");
         console.log('修改密码');
       },
       toPersonalPage(){
@@ -53,5 +53,9 @@ import router from '@/router';
   
   .option:hover {
     background-color: #f2f2f2;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
   }
   </style>

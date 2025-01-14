@@ -1,20 +1,17 @@
 <template>
   <GuideBar />
-  <h1>聊天室界面</h1>
   <div class="chat-container">
     <ChatList 
       @chat-selected="onChatSelected" 
-      @search-chats="getChatsList"
+      @search-chats="getChatsList_"
       :chats="chats"
     />
     <ChatArea v-if="selectedChat"
-      @set-dissolve="changeRoomStatus('解散')" 
-      @set-secrect="changeRoomStatus('私密')" 
-      @set-public="changeRoomStatus('公开')" 
+      @set-dissolve="changeRoomStatus()" 
       @send-message="handleSendMessage"
-      @get-chat-member="getchatMember"
-      @add-member="addMember"
-      @get-room-member="getRoomMember"
+      @get-chat-member="getchatMember_"
+      @add-member="addMember_"
+      @get-room-member="getRoomMember_"
       @remove-member="removeMember"
       :chatMembers="chatMember" 
       :roomMembers="roomMember" 
@@ -22,6 +19,7 @@
       :messages="messages" 
       :isSecret="isSecret"  
       :chats="chats"
+      :isRoomOwner="selectedChat.ownerId==uid"
     />
   </div>
 </template>
@@ -30,8 +28,7 @@
 import ChatList from '../components/ChatList.vue';
 import ChatArea from '../components/ChatArea.vue';
 import GuideBar from '../components/GuideBar.vue';
-import axios from 'axios';
-import {getChatsList,getChatMessages} from '../api';
+import {getChatsList,getChatMessages,removeMember,getRoomMember,addMember,getChatMember,dissolveRoom,sendMessage} from '../api';
 
 export default {
 name: 'ChatPage',
@@ -45,10 +42,9 @@ data() {
     uid: null,
     userImg: '',
     username: '',
-    //聊天列表
-    chats: [],
+    chats: [],          //聊天列表
     //当前聊天室信息
-    selectedChat: null,  //保存了聊天信息{id,name,ownerImage}
+    selectedChat: null,  //保存了聊天信息{id,name,}
     messages: [],
     isSecret: false,
     isDissolved: false,
@@ -77,51 +73,43 @@ methods: {
   //将项目成员移除
   async removeMember(id){
     try {
-      await axios.post('http://localhost:3000/api/removeMember', {
-        roomid: this.selectedChat.id,
-        RoomMemberId: id,
-      });
+      let ok=false;
+      ok=await removeMember(this.selectedChat.id,id);
+      if(ok)alert("移除成功！");
+      else alert("移除失败！");
+      this.getRoomMember_();
     } catch (error) {
       alert("移除失败！");
     } 
-    alert("移除成功！");
-    this.getRoomMember();
   },
   //从后端请求项目成员
-  async getRoomMember(){
+  async getRoomMember_(){
     try{
-      const response = await axios.get(`http://localhost:3000/api/getRoomMember`, {
-        params: {
-          roomid: this.selectedChat.id,
-        }
-      });
-      this.roomMember=response.data;
+      const response = await getRoomMember(this.selectedChat.id);
+      this.roomMember=response;
     }catch{
       alert("获取房间成员列表失败！");
     }
   },
   //将会话成员添加到项目中
-  async addMember(id){
+  async addMember_(id){
     try {
-      await axios.post('http://localhost:3000/api/addMember', {
-        roomid: this.selectedChat.id,
-        chatMemberId: id,
-      });
+      let ok=false;
+      ok=await addMember(this.selectedChat.id,id);
+      if(ok){
+        alert("添加成功！");
+        this.getchatMember_();
+      }
+      else alert("添加失败！");
     } catch (error) {
       alert("添加失败！");
     } 
-    alert("添加成功！");
-    this.getchatMember();
   },
   //从后端请求在会话中但不在项目中的成员
-  async getchatMember(){
+  async getchatMember_(){
     try{
-      const response = await axios.get(`http://localhost:3000/api/getChatMember`, {
-        params: {
-          roomid: this.selectedChat.id,
-        }
-      });
-      this.chatMember=response.data;
+      const response = await getChatMember(this.selectedChat.id);
+      this.chatMember=response;
     }catch{
       alert("获取会话成员列表失败！");
     }
@@ -130,52 +118,29 @@ methods: {
   async getChatsList_(searchWord) {
     try {
       const data=await getChatsList(this.uid,searchWord);
-      alert(JSON.stringify(data));
-      this.chats=data;
+      this.chats=data;                     
     } catch {
       alert("聊天列表获取失败");
     }
   },
-  //更改房间状态
-  changeRoomStatus(changeInfo) {
-    if (changeInfo == "解散") {
-      if (confirm("你确定解散房间吗？")) {
+  //更改房间状态:改成解散房间
+  changeRoomStatus() {
+    if (confirm("你确定解散房间吗？")) {
         if (this.sendRoomStatus("解散")) {
           this.isdissolved = true;
           alert("解散房间成功！");
           //解散后的逻辑(需补充)
           this.selectedChat = null;
-          this.getChatsList("");
+          this.getChatsList_("");
         }
       }
-    } else if (changeInfo == "私密") {
-      if (confirm("你确定将房间设置为私密吗？ps：私密后只有搭子才能看见以及进入房间。")) {
-        if (this.sendRoomStatus("私密")) {
-          this.isSecret = true;
-          alert("设置成功！");
-        }
-      }
-    } else if (changeInfo == "公开") {
-      if (confirm("你确定将房间设置为公开吗？ps：公开后所有人都能发现你的房间。")) {
-        if (this.sendRoomStatus("公开")) {
-          this.isSecret = false;
-          alert("设置成功！");
-        }
-      }
-    }
   },
   //向后端传输状态更新信息
-  async sendRoomStatus(roomInfo) {
+  async sendRoomStatus() {
     try {
-      const response = await axios.get(`http://localhost:3000/api/setRoomStatus`, {
-        params: {
-          roomid: this.selectedChat.id,
-          setStatus: roomInfo
-        }
-      });
-      if (!response.data.success) {
-        return false;
-      }
+      let ok=true;
+      ok=await dissolveRoom(this.selectedChat.id);
+      return ok;
     } catch (error) {
       return false;
     }
@@ -195,7 +160,7 @@ methods: {
     }
   },
   //处理发送信息
-  handleSendMessage(newMessage) {
+  async handleSendMessage(newMessage) {
     const message = {
       id: this.messages.length + 1,
       text: newMessage,
@@ -204,20 +169,18 @@ methods: {
       senderAvatarSrc: this.userImg,
       isImage: false,
       imageSrc: ''
-    };
-    const newMessageData = JSON.stringify(message);
+  };
 
     // 发送新消息请求到后端
-    axios.get('http://localhost:3000/api/sendchats/', {
-      params: {
-        roomid: this.selectedChat.id,
-        newmessage: newMessageData
+    try{
+      let ok=false;
+      ok=await sendMessage(this.selectedChat.id,message);
+      if(!ok){
+        alert("发送消息失败！");
       }
-    }).then(response => {
-      console.log('Message sent successfully:', response.data);
-    }).catch(error => {
-      alert("发送消息失败！" + error);
-    });
+    }catch{
+      alert("发送消息失败！");
+    }
   },
   // 开启长轮询
     startPolling() {
@@ -227,12 +190,11 @@ methods: {
 
     this.pollingInterval = setInterval(async () => {
       try {
+        //alert("messages: "+JSON.stringify(this.messages));
         const lastMessageId = this.messages.length;
         const data=await getChatMessages(this.selectedChat.id,lastMessageId);
         if (data.length > 0) {
           this.messages.push(...data);
-          //对列表消息进行去重
-          this.messages = this.messages.filter((item, index, self) => self.findIndex(t => t.id === item.id) === index);
         }
       } catch (error) {
         console.error('Error polling for new messages:', error);
@@ -255,11 +217,12 @@ beforeUnmount() {
 
 <style scoped>
 .chat-container {
-max-width: 1200px;
-display: flex;
-width: 80%;
-margin: 0 auto;
-border: 1px solid #ccc;
-height: 800px;
+  max-width: 1200px;
+  display: flex;
+  width: 80%;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  height: 800px;
+  margin: 140px auto 100px; 
 }
 </style>

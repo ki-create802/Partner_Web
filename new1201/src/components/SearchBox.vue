@@ -33,6 +33,7 @@ export default {
   methods: {
     handleInput() {
       // 当输入框内容变化时触发
+      if(this.searchQuery==null)return;
       this.$emit('input', this.searchQuery);
     },
     handleSearch() {
@@ -62,7 +63,9 @@ export default {
   overflow: hidden; /* 防止内容溢出 */
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影 */
+  top: 130px;
 }
+
 
 /* 输入框样式 */
 .search-input {

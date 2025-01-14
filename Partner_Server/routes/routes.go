@@ -20,7 +20,7 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		userRoutes.POST("logout", userController.Logout)                     //登出
 		userRoutes.POST("guanzhu", userController.GuanZhu)                   //关注用户
 		userRoutes.POST("fansNum", userController.FansNum)                   //粉丝数量
-		userRoutes.PATCH("editInfo", userController.EditInfo)                //用户编辑信息
+		userRoutes.POST("editInfo", userController.EditInfo)                 //用户编辑信息
 		userRoutes.POST("info", userController.Info)                         //返回用户信息
 		userRoutes.POST("forgot-password", userController.ForgotPassword)    //忘记密码
 		userRoutes.POST("verify-reset-code", userController.VerifyResetCode) //验证验证码
@@ -29,6 +29,7 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		//userRoutes.POST("getUserReviews", userController.GetUserReviews)     // 获取用户评分
 		userRoutes.POST("getUserLevel", userController.GetUserLevel)   // 获取用户等级称号
 		userRoutes.POST("resetPassword", userController.ResetPassword) //重置密码
+		userRoutes.POST("editPassword", userController.EditPassword)   //xiugai密码
 	}
 
 	chatController := controller.NewChatController()
@@ -45,10 +46,14 @@ func CollectRoutes(r *gin.Engine) *gin.Engine {
 		chatRoutes.POST("leaveChatRoom", chatController.LeaveChatRoom)     //退出群聊
 		chatRoutes.POST("addMember", chatController.AddMember)             //添加成员到uc_match表中
 		chatRoutes.POST("getSpeakers", chatController.GetSpeakers)         //返回发言成员列表（uc_match信息）
-		chatRoutes.POST("successMatch", chatController.SuccessMatch)       //添加成功匹配成员信息
+		chatRoutes.POST("getRoomMember", chatController.GetRoomMember)     //返回发言成员列表（uc_match信息）
+
+		chatRoutes.POST("successMatch", chatController.SuccessMatch) //添加成功匹配成员信息
 
 		chatRoutes.POST("getPendingChats", chatController.GetPendingChats) // 获取主页'等待中'板块聊天室列表
 		chatRoutes.POST("getHistoryChats", chatController.GetHistoryChats) // 获取主页'历史'板块聊天室列表
+
+		chatRoutes.POST("getTopChatRooms", chatController.GetTopChatRooms) //火文
 
 	}
 
