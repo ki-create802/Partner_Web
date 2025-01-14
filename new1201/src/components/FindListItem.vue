@@ -3,10 +3,10 @@
         <div class="body">
             <left>
                 <!-- 图标 -->
-                <img :src="defaultImage" class="icon" />
+                <img :src="`http://localhost:8082/avatars/${this.item.roomOwnerID}.jpg`" class="icon" />
                 <div class="room-info">
                     <!-- 房间名称和房间号 -->
-                    <div class="roomname">{{ item.roomOwnerName }}的聊天室（房间号：{{ item.roomID }}）</div>
+                    <div class="roomname">{{ item.roomName }} （{{ item.roomOwnerName }}的聊天室）</div>
                     <!-- 房间简介 -->
                     <div class="roomIntro">{{ item.roomIntro }}</div>
                 </div>

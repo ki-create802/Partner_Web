@@ -39,12 +39,17 @@ type InUserController interface {
 
 	//AddReview(c *gin.Context)      //评分功能
 	//GetUserReviews(c *gin.Context) //获取评分
-	GetUserLevel(c *gin.Context) //获取用户等级
-
+	GetUserLevel(c *gin.Context)  //获取用户等级
 	ResetPassword(c *gin.Context) //重置密码
+<<<<<<< HEAD
 	IsFollow(c *gin.Context)      //是否关注
 	CancelFollow(c *gin.Context)  //取消关注
+=======
+	EditPassword(c *gin.Context)  //修改密码
+>>>>>>> 7648bae0bb450212440401c34f4fa557b78c7f69
 
+	IsFollow(c *gin.Context)     //是否关注
+	CancelFollow(c *gin.Context) //取消关注
 }
 
 func NewUserController() InUserController {
@@ -287,6 +292,7 @@ func (a UserController) EditInfo(c *gin.Context) { //修改未测试
 	userRemark := requestUser.URemark
 	userImage := requestUser.UImage
 
+	fmt.Println("chuanru::::", userName)
 	// 数据验证
 	var user model.User
 	a.DB.Table("user").Where("uid=?", userid).First(&user)
@@ -303,7 +309,7 @@ func (a UserController) EditInfo(c *gin.Context) { //修改未测试
 		URemark: userRemark,
 		UImage:  userImage,
 	}
-	a.DB.Table("user").Where("uid=?", userid).Updates(updateData)
+	a.DB.Table("user").Debug().Where("uid=?", userid).Updates(updateData)
 
 	// 返回成功响应
 	common.Success(c, nil, "用户信息更新成功")
@@ -343,28 +349,41 @@ func (a UserController) ForgotPassword(c *gin.Context) {
 	var Message model.EmailMessage
 	c.Bind(&Message)
 	email := Message.Email
+
 	// 如果电子邮件地址为空，返回400错误
 	if email == "" {
 		common.Fail(c, 400, gin.H{"error": "Email is required"}, "电子邮件地址为空")
 		return
 	}
 
-	//调用GenerateRandomCode生成随机六位数
+	// 检查邮箱是否已注册
+	var user model.User
+	a.DB.Table("user").Where("uemail=?", email).First(&user)
+	if user.UID == 0 {
+		// common.Fail(c, 202, nil, "该邮箱未注册")
+		common.Fail(c, 202, nil, "该邮箱未注册")
+		return
+	}
+
+	// 调用GenerateRandomCode生成随机六位数
 	code := utils.GenerateRandomCode(6)
-	//调用SendVerificationCode函数发送验证码到用户的电子邮件。
+
+	// 调用SendVerificationCode函数发送验证码到用户的电子邮件
 	err := services.SendVerificationCode(email, code)
 	if err != nil {
 		common.Fail(c, 500, gin.H{"error": "Failed to send verification code"}, "服务器错误")
 		return
 	}
-	//初始化redis客户端
+
+	// 初始化redis客户端
 	redisClient := redis.NewRedisClient()
 	err = redisClient.SetCode(email, code, 5*time.Minute) // 设置验证码有效期为5分钟
 	if err != nil {
-		//存储验证码失败
+		// 存储验证码失败
 		common.Fail(c, 500, gin.H{"error": "Failed to store verification code"}, "服务器错误")
 		return
 	}
+
 	common.Success(c, gin.H{"message": "Verification code sent to your email."}, "成功发送验证码到邮箱")
 }
 
@@ -641,6 +660,45 @@ func (a UserController) ResetPassword(c *gin.Context) {
 	common.Success(c, nil, "密码更新成功")
 }
 
+<<<<<<< HEAD
+=======
+// 修改密码
+func (a UserController) EditPassword(c *gin.Context) {
+	var request struct {
+		UserID      int    `json:"userid"`      // 用户ID
+		NewPassword string `json:"newPassword"` // 新密码
+	}
+
+	// 解析请求参数
+	if err := c.Bind(&request); err != nil {
+		common.Fail(c, 400, nil, "请求参数解析失败")
+		return
+	}
+
+	// 验证用户ID是否存在
+	var user model.User
+	a.DB.Table("user").Where("uid=?", request.UserID).First(&user)
+	if user.UID == 0 {
+		common.Fail(c, 422, nil, "用户不存在")
+		return
+	}
+
+	// 更新密码
+	updateData := model.User{
+		UKey: request.NewPassword, // 将新密码赋值给 UKey
+	}
+
+	// 根据用户ID更新密码
+	result := a.DB.Table("user").Where("uid=?", request.UserID).Updates(updateData)
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "密码更新失败")
+		return
+	}
+
+	common.Success(c, nil, "密码更新成功")
+}
+
+>>>>>>> 7648bae0bb450212440401c34f4fa557b78c7f69
 // 是否关注当前用户
 func (a UserController) IsFollow(c *gin.Context) {
 	var requestUser model.Gz
@@ -660,7 +718,11 @@ func (a UserController) IsFollow(c *gin.Context) {
 
 	// 查询 gz_match 表中是否存在该关注关系
 	var count int64
+<<<<<<< HEAD
 	a.DB.Table("gzmatch").Where("gz_id = ? AND bgz_id = ?", gzid, bgzid).Count(&count)
+=======
+	a.DB.Table("gzmatch").Debug().Where("gz_id = ? AND bgz_id = ?", gzid, bgzid).Count(&count)
+>>>>>>> 7648bae0bb450212440401c34f4fa557b78c7f69
 
 	// 返回结果
 	if count > 0 {

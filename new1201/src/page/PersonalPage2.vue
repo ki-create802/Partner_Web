@@ -156,7 +156,7 @@ export default {
     background-color: #f1f2f3;
 }
 .user-info {
-    margin-top: 90px;
+    margin-top: 11.5%;
     z-index: 1;
     position: relative;
 }

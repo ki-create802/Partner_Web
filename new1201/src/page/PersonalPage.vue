@@ -28,13 +28,21 @@
                 </button>
             </div>
             <div class="tab-content">
+                <!-- 加载状态 -->
+                <div v-if="isLoading" class="loading">加载中...</div>
+                <!-- 错误提示 -->
+                <div v-if="error" class="error">{{ error }}</div>
+                <!-- 等搭中内容 -->
                 <div v-if="currentTab === 'waiting'" class="wait-content">
-                    <!-- 等搭中内容 -->
-                    <p>等搭中的聊天框内容。</p>
+                    <FindListItem 
+                        v-for="(chat,index) in pendingChats" 
+                        :key="index" 
+                        :item="chat" />
                 </div>
+                <!-- 历史内容 -->
                 <div v-if="currentTab === 'history'" class="his-content">
-                    <!-- 历史内容 -->
-                    <p>历史的聊天框内容。</p>
+                    
+                    <FindListItem />
                 </div>
             </div>
         </div>
@@ -45,17 +53,84 @@
 <script>
 import InformationBox from '../components/InformationBox.vue';
 import GuideBar from '@/components/GuideBar.vue';
+import FindListItem from '@/components/FindListItem.vue';
+import axios from 'axios';
 
 export default {
     name: 'HomePage',
     data() {
         return {
-            currentTab: 'waiting' // 默认显示“等搭中”
+            currentTab: 'waiting', // 默认显示“等搭中”
+            pendingChats: [],
+            historyChats: [],
+            isLoading: false,
+            error: null,
         }
     },
     components: {
         GuideBar,
         InformationBox,
+        FindListItem,
+    },
+    methods: {
+        async fetchPendingChats() {
+            this.isLoading = true;
+            this.error = null;
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const userID = user.UID;
+                console.log(userID);
+                const response = await axios.post(`http://localhost:8082/chat/getPendingChats`, {
+                    userID: userID
+                });
+                alert("接收到的response"+JSON.stringify(response));
+                this.pendingChats=response.data.data.pendingChats;
+                alert("接收到的9999:"+JSON.stringify(this.pendingChats));
+                // this.pendingChats = response.data.data.pendingChats.map(chat => ({
+                //     ...chat,
+                //     memberList: chat.memberList || [] // 处理空的 memberList
+                // }));
+            } catch (err) {
+                this.error = '获取等搭中聊天室失败，请重试';
+                console.error(err);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        async fetchHistoryChats() {
+            this.isLoading = true;
+            this.error = null;
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const userID = user.UID;
+                console.log(userID);
+                const response = await axios.post(`http://localhost:8082/chat/getHistoryChats`, {
+                    userID: userID
+                });
+                alert("接收到的消息："+JSON.stringify(response.data.data.pendingchats));
+                this.historyChats = response.data.data.historyChats.map(chat => ({
+                    ...chat,
+                    memberList: chat.memberList || [] // 处理空的 memberList
+                }));
+            } catch (err) {
+                this.error = '获取历史聊天室失败，请重试';
+                console.error(err);
+            } finally {
+                this.isLoading = false;
+            }
+        }
+    },
+    watch: {
+        currentTab(newTab) {
+            if (newTab === 'waiting') {
+                this.fetchPendingChats();
+            } else if (newTab === 'history') {
+                this.fetchHistoryChats();
+            }
+        },
+    },
+    mounted() {
+        this.fetchPendingChats();
     },
 }
 </script>
@@ -77,12 +152,13 @@ export default {
     z-index: 0;                   
 }
 .more-info {
+    margin-top: 8%;
     display: flex;
     gap: 30px;
     background-color: #f1f2f3;
 }
 .user-info {
-    margin-top: 90px;
+    margin-top: 11.5%;
     z-index: 1;
     position: relative;
 }

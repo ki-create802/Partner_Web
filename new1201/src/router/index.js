@@ -11,6 +11,7 @@ import AboutUsPage from '@/page/AboutUsPage.vue';
 import NewRoomPage from '@/page/NewRoomPage.vue';
 import ForgotPWPage from '@/page/ForgotPWPage.vue';
 import PersonalPage2 from '@/page/PersonalPage2.vue';
+import ModifyPWPage from '@/page/ModifyPWPage.vue';
 
 const routes = [
   {
@@ -68,7 +69,12 @@ const routes = [
     path: '/PersonalPage2',
     name: 'PersonalPage2',
     component: PersonalPage2
-  }
+    },
+    {
+      path: '/ModifyPWPAge',
+      name: 'ModifyPWPage',
+      component: ModifyPWPage
+      }
 ];
 
 const router = createRouter({

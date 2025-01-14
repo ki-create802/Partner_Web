@@ -1,4 +1,5 @@
 <template>
+  <div class="background-layer"></div>
   <div class="information">
     <div class="avatar-container">
       <div class="avatar">
@@ -29,13 +30,18 @@
 
 <script>
 import axios from 'axios';
-import { getFansNum } from '@/api.js';
+import { getFansNum,editNewName,uploadAvatar } from '@/api.js';
 
 export default {
   name: 'InformationBox',
   data() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    //alert("本地存储user："+localStorage.getItem('user'));
+    const UserID = user.UID;
+    alert("本地存储："+JSON.stringify(user));
     return{
-      avatarUrl:require("@/assets/avatar.png"), // 默认头像
+      UserID,
+      avatarUrl: UserID ? `http://localhost:8082/avatars/${UserID}.jpg` : require("@/assets/avatar.png"),
       username: JSON.parse(localStorage.getItem('user')).UName||'默认用户名',
       followersCount: 2000,
       signature: JSON.parse(localStorage.getItem('user')).URemark ||'默认个性签名',
@@ -54,22 +60,38 @@ export default {
         };
         reader.readAsDataURL(file);
       }
-    },
-    editusername() {
-      const newusername = prompt('请输入新的昵称', this.username);
-      if (newusername) {
-        this.username = newusername; // 更新昵称
-        localStorage.setItem('userusername', this.username); // 保存到 localStorage
-
-        // 假设你的 API 路径是 /update-username
-        axios.post('/update-username', { username: this.username })
-        .then(response => {
-          console.log('昵称更新成功:', response.data);
+      // 调用上传头像函数
+      uploadAvatar(this.UserID, file)
+        .then((success) => {
+          if (success) {
+            alert("头像上传成功！");
+          } else {
+            alert("头像上传失败，请重试。");
+          }
         })
-        .catch(error => {
-          console.error('更新昵称失败:', error);
+        .catch((error) => {
+          console.error("上传失败：", error);
         });
+    },
+    async editusername() {
+      const newusername = prompt('请输入新的昵称', this.username);
+      if(!newusername||newusername.trim=="")return;
+      //向后端发送修改昵称请求
+      try{
+        let ok=false;
+        ok=await editNewName(this.UserID,newusername);
+        if(!ok){
+          alert("修改昵称失败！");
+          return;
+        }
+      }catch{
+        alert("修改昵称失败！");
+        return;
       }
+      let user=JSON.parse(localStorage.getItem('user'));
+      user.UName=newusername;
+      localStorage.setItem('user', JSON.stringify(user));
+      this.username=user.UName;
     },
     saveSignature() {
       localStorage.setItem('userSignature', this.signature); // 保存到 localStorage
@@ -113,6 +135,8 @@ export default {
   margin-bottom: 5px;
   margin-left: 25px;
   margin-right: 35px;
+  background-color: rgba(255, 255, 255, 0.1);  /* 设置白色半透明背景 */
+
 }
 
 .avatar {
@@ -123,6 +147,8 @@ export default {
   overflow: hidden;
   margin-bottom: 10px;
   margin-top: 15px;
+  background-color: rgba(255, 255, 255, 0.1);  /* 设置白色半透明背景 */
+
 }
 
 .avatar img {

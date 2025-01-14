@@ -62,7 +62,6 @@
 <script>
 import GuideBar from '@/components/GuideBar.vue';
 import ACalendar from '@/components/ACalendar.vue';
-// import CarouselImage from '@/components/CarouselImage.vue';
 import Module from '@/components/MoDule1.vue';
 import SearchBox from '@/components/SearchBox.vue';
 import FindListItem from '@/components/FindListItem.vue';
@@ -126,7 +125,6 @@ export default {
           }
         });
       } catch (error) {
-       alert("11搜索信息失败");
         console.error('搜索请求失败:', error);
       }
     },
@@ -136,7 +134,6 @@ export default {
         this.hotlist = data;
       } catch (error) {
         console.error('获取热门数据失败:', error);
-        //alert("获取热门数据失败");
       }
     },
     updateDate() {

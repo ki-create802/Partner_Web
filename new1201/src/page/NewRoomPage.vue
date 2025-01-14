@@ -1,5 +1,6 @@
 <template>
     <GuideBar />
+    <div class="bgimg"></div>
     <div class = "createroom-container">
         <form @submit.prevent="handleSubmit">
             <div class="form-group">
@@ -151,6 +152,19 @@ export default{
 
 <style scoped>
 
+    .bgimg{
+        /* width: 150px;
+        height: 60px; */
+        width: 100%;
+        height: 100%;
+        position: fixed; 
+        top: 0;
+        left: 0;
+        background-image: url('~@/assets/login_bg.JPG');
+        background-size: cover;
+        background-position: center; /* 居中对齐背景图 */
+        z-index: -1; /* 设置层级，使其在所有内容下方 */
+    }
     .createroom-container {
         /* max-width: 600px; */
         width:50vw;
@@ -159,7 +173,8 @@ export default{
         padding: 40px;
         border: 1px solid #ddd;
         border-radius: 8px;
-        background-color: #f9f9f9;
+        /* background-color: #f9f9f9; */
+        background-color: rgba(255, 255, 255, 0.5); /* 半透明白色背景 */
         text-align: center;
 
         display:flex;

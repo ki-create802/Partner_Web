@@ -5,38 +5,33 @@ const API_BASE_URL = 'http://localhost:8082';
 //const test_URL = 'http://localhost:3000/api';
 
 // 获取聊天列表
-/*
+/*alert
 */
 export const getChatsList = async (userID, searchWord) => {
-  alert("uid,search="+JSON.stringify(userID)+JSON.stringify(searchWord));
   try {
     const response = await axios.post(`${API_BASE_URL}/chat/chatLists`, {
       userID,
       searchWord,
     });
-    // const response = await axios.get(`${test_URL}/api/chats`, {
-    //   uid,
-    //   searchWord,
-    // });
-    alert("response.data.data:"+JSON.stringify(response.data.data));
     return response.data.data.chatList;
   } catch (error) {
-    alert('Error fetching chat list:'+error);
+    console.error('获取聊天列表失败:', error);
     throw error;
   }
 };
 
 // 获取聊天记录
-export const getChatMessages = async (roomId,lastMessageId) => {
+export const getChatMessages = async (roomId, lastMessageId) => {
+  //alert("获取聊天记录lastID："+JSON.stringify(lastMessageId));
   try {
     const response = await axios.post(`${API_BASE_URL}/chat/chatRecords`, {
-      cid : roomId,
-      last_rid : lastMessageId,
+      cid: roomId,
+      last_rid: lastMessageId,
     });
-    //alert("response.data.data.chatRecords:"+JSON.stringify(response.data.data.chatRecords));
+    //alert("获取聊天记录lastID："+JSON.stringify(lastMessageId)+"获取聊天记录："+JSON.stringify(response));
+    if(response.data.data==null)return [];
     return response.data.data.chatRecords;
   } catch (error) {
-    //alert("error"+error);
     console.error('Error fetching chat messages:', error);
     throw error;
   }
@@ -45,23 +40,39 @@ export const getChatMessages = async (roomId,lastMessageId) => {
 // 发送消息
 export const sendMessage = async (roomId, newMessage) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/sendchats/`, {
-      params: { roomid: roomId, newmessage: newMessage },
+    const response = await axios.post(`${API_BASE_URL}/chat/saveChatRecords`, {
+      roomid: roomId,
+      newmessage: newMessage,
     });
-    return response.data;
+    if(response.data.code==200)return true;
+    else return false;
   } catch (error) {
     console.error('Error sending message:', error);
     throw error;
+    
   }
 };
 
 // 获取房间成员
 export const getRoomMember = async (roomId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/getRoomMember`, {
-      params: { roomid: roomId },
+    const response = await axios.post(`${API_BASE_URL}/chat/getRoomMember`, {
+      roomID: roomId,
     });
-    return response.data;
+    return response.data.data.RoomMemberList;
+  } catch (error) {
+    console.error('Error fetching room members:', error);
+    throw error;
+  }
+};
+
+// 获取在会话，但不在房间中的成员
+export const getChatMember = async (roomId) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/chat/getSpeakers`, {
+      roomID: roomId,
+    });
+    return response.data.data.speakerList;
   } catch (error) {
     console.error('Error fetching room members:', error);
     throw error;
@@ -71,11 +82,12 @@ export const getRoomMember = async (roomId) => {
 // 添加成员
 export const addMember = async (roomId, chatMemberId) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/addMember`, {
-      roomid: roomId,
-      chatMemberId,
+    const response = await axios.post(`${API_BASE_URL}/chat/successMatch`, {
+      roomID: roomId,
+      userID: chatMemberId,
     });
-    return response.data;
+    if(response.data.code==200)return true;
+    else return false;
   } catch (error) {
     console.error('Error adding member:', error);
     throw error;
@@ -92,17 +104,31 @@ response
 */
 export const removeMember = async (roomId, RoomMemberId) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/removeMember`, {
-      roomid: roomId,
-      RoomMemberId,
+    const response = await axios.post(`${API_BASE_URL}/chat/leaveChatRoom`, {
+      roomID: roomId,
+      userID:RoomMemberId,
     });
-    return response.data;
+    if(response.data.code==200)return true;
+    else return false;
   } catch (error) {
     console.error('Error removing member:', error);
     throw error;
   }
 };
 
+//解散·房间·
+export const dissolveRoom = async (roomId) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/chat/disbandChatRoom`, {
+      roomID: roomId,
+    });
+    if(response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    console.error('Error removing member:', error);
+    throw error;
+  }
+};
 
 /* 获取热门数据
 request get
@@ -117,8 +143,8 @@ response (返回的是数组，数组每一项对象如下结构)
 */
 export const fetchHotData = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/hot`);
-    return response.data;
+    const response = await axios.post(`${API_BASE_URL}/chat/getTopChatRooms`);
+    return response.data.data.topChatRooms;
   } catch (error) {
     console.error('Error fetching hot data:', error);
     throw error;
@@ -139,6 +165,7 @@ response (和热门数据返回内容的格式相同是个List)
         memberId,memberId...
 */
 export const search = async (query, scope) => {
+  alert("搜索词："+JSON.stringify(query));
     if(!query)query="";
     try {
       const response = await axios.post(`${API_BASE_URL}/chat/searchChatList`, {
@@ -169,7 +196,6 @@ export const searchUsers = async (searchWord) => {
     const response = await axios.post(`${API_BASE_URL}/chat/searchUser`, {
       query: searchWord
     });
-    alert("后端返回用户俩表："+JSON.stringify(response));
     return response.data.data.userList;
   } catch (error) {
     console.error('Error searching users:', error);
@@ -206,7 +232,6 @@ respone:
 // };
 export const login = async (email, password) => {
     try {
-      alert("进入登录");
       const response = await axios.post(`${API_BASE_URL}/user/login`, {
         Email: email,
         Password: password,
@@ -229,7 +254,6 @@ export const getFansNum = async () => {
     });
     alert("后端粉丝数"+JSON.stringify(response.data.data));
     return response.data.data.fansNum;
-    
   } catch (error) {
     console.error('Error logging in:', error);
     throw error;
@@ -237,13 +261,15 @@ export const getFansNum = async () => {
 };
 
 // 注册
-export const signUp = async (email, password) => {
+export const signUp = async (username,email, password) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/signup`, {
+    const response = await axios.post(`${API_BASE_URL}/user/register`, {
+      UName:username,
       Email: email,
       Password: password,
     });
-    return response.data;
+    if(response.data.code==200)return true;
+    else return false;
   } catch (error) {
     console.error('Error signing up:', error);
     throw error;
@@ -295,16 +321,12 @@ export const newRoom = async (roomName, typeID,Uid,memberNum,dateTime,remark) =>
       CYueDate:dateTime,
       Cremark:remark
     });
-    alert(JSON.stringify(response));
-    alert("chat新建："+JSON.stringify({roomName, typeID,Uid,memberNum,dateTime,remark}));
     if (response.data.code==200)return true;
     else return false;
   } catch (error) {
-    
-    alert("新建房间失败");
+    alert("新建房间失败"+error);
     console.error('Error signing up:', error);
     throw error;
-    
   }
 };
 
@@ -324,7 +346,6 @@ export const checkCode = async (email,code) => {
   }
 };
 
-//忘记密码
 export const forgetPW = async (email) => {
   alert("邮箱："+email);
   try {
@@ -332,6 +353,10 @@ export const forgetPW = async (email) => {
       email,
     });
     if(response.data.code==200)return true;
+    else if(response.data.code==202){
+      alert("该邮箱未注册");
+      return false;
+    }
     else return false;
   } catch (error) {
     console.error('Error signing up:', error);
@@ -353,6 +378,7 @@ export const resetPW = async (email,newPW) => {
     throw error;
   }
 };
+
 
 //加入会话请求
 export const joinChat = async (cid,uid) => {
@@ -415,6 +441,20 @@ export const followadd = async (uid1,uid2) => {
     else return false;
   } catch (error) {
     console.error('Error signing up:', error);
+  }
+}
+  
+//修改密码
+export const editPW = async (uid,newPW) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/editPassword`, {
+      userid:uid,
+      newPassword:newPW
+    });
+    if(response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    console.error('修改密码失败', error);
     throw error;
   }
 };
@@ -433,6 +473,21 @@ export const whetherfollow = async (uid1,uid2) => {
     else return false;
   } catch (error) {
     console.error('Error signing up:', error);
+  }
+}
+
+//修改昵称请求
+export const editNewName = async (uid,newName) => {
+  alert("修改昵称请求："+uid+":"+newName);
+  try {
+    const response = await axios.post(`${API_BASE_URL}/user/editInfo`, {
+      UID:uid,
+      UName:newName
+    });
+    if(response.data.code==200)return true;
+    else return false;
+  } catch (error) {
+    console.error('修改密码失败', error);
     throw error;
   }
 };
@@ -455,3 +510,27 @@ export const unfollow = async (uid1,uid2) => {
 };
 
 
+// 上传头像请求
+export const uploadAvatar = async (uid, file) => {
+  alert("上传头像请求：" + uid + "，文件名：" + file.name);
+  try {
+    // 创建 FormData 对象
+    const formData = new FormData();
+    formData.append("userID", uid); // 添加用户ID（注意：后端使用的是 userID）
+    formData.append("avatar", file); // 添加头像文件
+
+    // 发送 POST 请求
+    const response = await axios.post(`${API_BASE_URL}/file/uploadAvatar`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data", // 设置请求头
+      },
+    });
+
+    // 根据响应结果返回 true 或 false
+    if (response.data.code == 200) return true;
+    else return false;
+  } catch (error) {
+    console.error("上传头像失败", error);
+    throw error;
+  }
+};
