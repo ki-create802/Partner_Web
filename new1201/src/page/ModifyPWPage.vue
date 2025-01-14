@@ -10,7 +10,7 @@
               type="password"
               id="newPassword"
               v-model="newPassword"
-              placeholder="Enter new password"
+              placeholder="请输入密码"
               required
             />
           </div>
@@ -20,16 +20,17 @@
               type="password"
               id="confirmPassword"
               v-model="confirmPassword"
-              placeholder="Confirm new password"
+              placeholder="请再次确认密码"
               required
             />
           </div>
-          <button type="submit">Reset Password</button>
+          <button type="submit" @click="editPW_">Reset Password</button>
         </form>
     </div>
 </template>
 
 <script>
+import {editPW} from '@/api'
 import GuideBar from '../components/GuideBar.vue';
 export default{
     name: "ModifyPWPage",
@@ -41,6 +42,32 @@ export default{
             newPassword:"",
             confirmPassword:"",
         }
+    },
+    methods:{
+      async editPW_(){
+        if(this.newPassword!=this.confirmPassword){
+          alert("请确认两次输入密码一致！");
+          return;
+        }
+        let UserID = 0;
+        try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const user = JSON.parse(storedUser);
+                UserID = user.UID;
+            }
+        } catch {
+            alert("获取本地个人信息失败");
+        }
+        try{
+          let ok=false;
+          ok=await editPW(UserID,this.newPassword);
+          if(ok)alert("修改密码成功！");
+          else alert("修改密码失败！");
+        }catch{
+          alert("修改密码失败！");
+        }
+      }
     }
 }
 </script>
@@ -61,7 +88,7 @@ export default{
     }
 .modify-pw-container{
     max-width: 400px;
-    margin: 100px auto;
+    margin: 180px auto;
     padding: 40px;
     border: 1px solid #ddd;
     border-radius: 8px;
