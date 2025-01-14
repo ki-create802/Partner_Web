@@ -24,12 +24,13 @@
               required
             />
           </div>
-          <button type="submit">Reset Password</button>
+          <button type="submit" @click="editPW_">Reset Password</button>
         </form>
     </div>
 </template>
 
 <script>
+import {editPW} from '@/api'
 import GuideBar from '../components/GuideBar.vue';
 export default{
     name: "ModifyPWPage",
@@ -41,6 +42,32 @@ export default{
             newPassword:"",
             confirmPassword:"",
         }
+    },
+    methods:{
+      async editPW_(){
+        if(this.newPassword!=this.confirmPassword){
+          alert("请确认两次输入密码一致！");
+          return;
+        }
+        let UserID = 0;
+        try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const user = JSON.parse(storedUser);
+                UserID = user.UID;
+            }
+        } catch {
+            alert("获取本地个人信息失败");
+        }
+        try{
+          let ok=false;
+          ok=await editPW(UserID,this.newPassword);
+          if(ok)alert("修改密码成功！");
+          else alert("修改密码失败！");
+        }catch{
+          alert("修改密码失败！");
+        }
+      }
     }
 }
 </script>

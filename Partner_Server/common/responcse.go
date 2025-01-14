@@ -18,6 +18,8 @@ func Success(c *gin.Context, data gin.H, msg string) {
 // Fail 失败
 func Fail(c *gin.Context, code int, data gin.H, msg string) {
 	switch code {
+	case 202:
+		Response(c, http.StatusAccepted, 202, data, msg) // Accepted 请求已接受
 	case 400:
 		Response(c, http.StatusBadRequest, 400, data, msg) // 请求错误
 	case 422:

@@ -30,8 +30,8 @@
             </p>
   
           <!-- 验证码输入框 -->
-          <!--div v-if="isCodeSent" class="form-group"-->
-          <div  class="form-group"> 
+          <div v-if="isCodeSent" class="form-group">
+          <!--div  class="form-group"--> 
             <input
               type="text"
               v-model="verificationCode"
@@ -129,13 +129,16 @@
         }, 1000); // 每秒执行一次
       },
       async handleVerifyCode() {
-        // 模拟验证验证码逻辑
-        const ok=await checkCode(this.email,this.verificationCode)
-        if (ok) {
-          this.showResetPasswordModal = true;
-          this.isCodeSent = false; // 确保隐藏验证码和邮箱表单
-        } else {
-          alert("验证码错误");
+        try{
+          const ok=await checkCode(this.email,this.verificationCode)
+          if (ok) {
+            this.showResetPasswordModal = true;
+            this.isCodeSent = false; // 确保隐藏验证码和邮箱表单
+          } else {
+            alert("验证码错误");
+          }
+        }catch{
+          console("验证错误");
         }
       },
       async resetPassword() {

@@ -3,7 +3,7 @@
   <div class="chat-container">
     <ChatList 
       @chat-selected="onChatSelected" 
-      @search-chats="getChatsList"
+      @search-chats="getChatsList_"
       :chats="chats"
     />
     <ChatArea v-if="selectedChat"
