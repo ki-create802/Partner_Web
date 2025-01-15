@@ -61,7 +61,7 @@ export default {
     };
   },
   methods: {
-    async triggerFollow() {
+    async triggerFollow() {//alert
       try {
         //获取个人id
         let UserID = 0;
@@ -83,10 +83,6 @@ export default {
           // 关注
           await followadd(UserID, this.userInfo.UID);
         }
-        //alert("hhh"+UserID);
-        //alert("this.UID"+this.userInfo.UID);
-        //const response = await followadd(this.userInfo.UID,UserID);
-        //alert("收到的response："+JSON.stringify(response))
         // 关注成功后，触发事件通知父组件
         this.$emit('follow-success');
         
@@ -118,7 +114,7 @@ export default {
   border: 1px solid #ddd;
   border-radius: 8px;
   width: 100%;
-  background-color: rgba(255, 255, 255, 0.1);  /* 设置白色半透明背景 */
+  background-color: rgba(255, 255, 255, 0.33);  /* 设置白色半透明背景 */
 }
 
 .avatar-container {
@@ -195,8 +191,17 @@ export default {
 }
 
 .information-right {
-  flex: 2;
-  padding-left: 20px;
+  flex: 2; /* 占据剩余空间 */
+  padding: 10px; /* 减少内边距 */
+  font-size: 14px; /* 减小字体大小 */
+  line-height: 1.2; /* 减小行高 */
+  height: 100px; /* 固定高度 */
+  overflow: hidden; /* 超出部分隐藏 */
+  text-align: left; /* 文本左对齐 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+  border-radius: 8px; /* 圆角 */
+  background-color: rgba(255, 255, 255, 0.432); /* 半透明背景 */
+  margin-top:20px;
 }
 
 .signature {

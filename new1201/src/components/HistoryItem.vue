@@ -13,7 +13,6 @@
             </left>
             <right>
                 <img v-for="(i, index) in item.memberList" :key="index" :src="`http://localhost:8082/avatars/${i.memberID}.jpg`"/>
-                <button class="join-button" @click="showModal = true">加入</button>
             </right>
         </div>
         <!-- 使用弹窗组件 -->
@@ -31,7 +30,7 @@ import defaultImage from "@/assets/14efc6b3_E380544_1da91e8b.png";
 import ConfirmModal from "@/components/PopWindowJoin.vue"; // 引入弹窗组件
 import {joinChat} from "@/api"
 export default {
-    name: 'FindListItem',
+    name: 'HistoryItem',
     components: {
         ConfirmModal, // 注册弹窗组件
     },

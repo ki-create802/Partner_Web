@@ -41,12 +41,7 @@ type InUserController interface {
 	//GetUserReviews(c *gin.Context) //获取评分
 	GetUserLevel(c *gin.Context)  //获取用户等级
 	ResetPassword(c *gin.Context) //重置密码
-<<<<<<< HEAD
-	IsFollow(c *gin.Context)      //是否关注
-	CancelFollow(c *gin.Context)  //取消关注
-=======
 	EditPassword(c *gin.Context)  //修改密码
->>>>>>> 7648bae0bb450212440401c34f4fa557b78c7f69
 
 	IsFollow(c *gin.Context)     //是否关注
 	CancelFollow(c *gin.Context) //取消关注
@@ -608,24 +603,24 @@ func (a UserController) GetUserLevel(c *gin.Context) {
 	}
 
 	// 根据等级返回称号
-	var levelTitle string
-	switch userLevel.Level {
-	case 0:
-		levelTitle = "搭子探索者"
-	case 1:
-		levelTitle = "初级搭子体验者"
-	case 2:
-		levelTitle = "中级搭子爱好者"
-	case 3:
-		levelTitle = "高级搭子行家"
-	case 4:
-		levelTitle = "搭子达人"
-	default:
-		levelTitle = "未知等级"
-	}
+	// var levelTitle string
+	// switch userLevel.Level {
+	// case 0:
+	// 	levelTitle = "搭子探索者"
+	// case 1:
+	// 	levelTitle = "初级搭子体验者"
+	// case 2:
+	// 	levelTitle = "中级搭子爱好者"
+	// case 3:
+	// 	levelTitle = "高级搭子行家"
+	// case 4:
+	// 	levelTitle = "搭子达人"
+	// default:
+	// 	levelTitle = "未知等级"
+	// }
 
 	// 返回结果
-	common.Success(c, gin.H{"levelTitle": levelTitle}, "成功获取用户等级称号")
+	common.Success(c, gin.H{"levelTitle": userLevel.Level}, "成功获取用户等级称号")
 }
 
 // 重置密码

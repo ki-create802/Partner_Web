@@ -30,15 +30,13 @@
 
 <script>
 import axios from 'axios';
-import { getFansNum,editNewName,uploadAvatar } from '@/api.js';
+import { getFansNum,editNewName,uploadAvatar,editSign } from '@/api.js';
 
 export default {
   name: 'InformationBox',
   data() {
     const user = JSON.parse(localStorage.getItem('user'));
-    //alert("本地存储user："+localStorage.getItem('user'));
     const UserID = user.UID;
-    alert("本地存储："+JSON.stringify(user));
     return{
       UserID,
       avatarUrl: UserID ? `http://localhost:8082/avatars/${UserID}.jpg` : require("@/assets/avatar.png"),
@@ -49,7 +47,7 @@ export default {
   },
   methods: {
     triggerAvatarUpload() {
-      this.$refs.avatarUpload.click(); // 触发文件选择框
+      this.$refs.avatarUpload.click(); // 触发文件选择框alert
     },
     onAvatarChange(event) {
       const file = event.target.files[0];
@@ -93,8 +91,26 @@ export default {
       localStorage.setItem('user', JSON.stringify(user));
       this.username=user.UName;
     },
-    saveSignature() {
-      localStorage.setItem('userSignature', this.signature); // 保存到 localStorage
+    async saveSignature() {
+      let newSign=this.signature;
+      try{
+        let ok=false;
+        ok=await editSign(this.UserID,this.signature);
+        if(!ok){
+          alert("更新头像失败！");
+          this.signature=JSON.parse(localStorage.getItem('user')).URemark;
+          return;
+        }
+        else{
+          let user=JSON.parse(localStorage.getItem('user'));
+          user.URemark=newSign;
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+      }catch(error){
+        alert("更新头像失败！");
+        this.signature=JSON.parse(localStorage.getItem('user')).URemark;
+        console("更新头像失败：",error);
+      }
 
       // 假设你的 API 路径是 /update-signature
       axios.post('/update-signature', { signature: this.signature })

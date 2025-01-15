@@ -84,7 +84,6 @@ export default {
       try {
         const data=await search(searchParams.query,searchParams.scope);
         this.searchResults=data;
-        alert("data：：："+JSON.stringify(data));
         this.searchQuery = searchParams.query;
         this.searchScope = searchParams.scope;
         this.selectedScope = searchParams.scope; // 更新选中的范围

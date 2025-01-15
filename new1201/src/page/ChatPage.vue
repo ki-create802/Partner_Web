@@ -68,7 +68,7 @@ created() {
       this.username = user.UName;
     }
     this.userImg = localStorage.getItem('userImage');
-    this.getChatsList_(""); //获取聊天列表
+    this.getChatsList_(""); //获取聊天列表alert
   } catch {
     alert("获取本地个人信息失败");
   }
@@ -172,7 +172,6 @@ methods: {
     try {
       // 获取历史聊天信息
       const data=await getChatMessages(chatInfo.id,0);
-      alert("选中聊天："+JSON.stringify(this.selectedChat));
       this.messages=data;
       // 开启长轮询
       this.startPolling();
