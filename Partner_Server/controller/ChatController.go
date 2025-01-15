@@ -270,12 +270,12 @@ func (b ChatController) LeaveChatRoom(c *gin.Context) {
 		return
 	}
 
-	// // 从 uc_match 表中删除用户
-	// result = b.DB.Table("uc_match").Where("cid = ? AND uid = ?", roomID, userID).Delete(&model.UcMatch{})
-	// if result.Error != nil {
-	// 	common.Fail(c, 500, nil, "从 uc_match 表中删除用户失败")
-	// 	return
-	// }
+	// 从 uc_match 表中删除用户
+	result = b.DB.Table("uc_match").Where("cid = ? AND uid = ?", roomID, userID).Delete(&model.UcMatch{})
+	if result.Error != nil {
+		common.Fail(c, 500, nil, "从 uc_match 表中删除用户失败")
+		return
+	}
 
 	common.Success(c, nil, "用户已成功退出群聊")
 }
